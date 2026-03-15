@@ -9,12 +9,16 @@
 <body>
     <!-- Upper Buttons -->
     <div class="upperContainer">
-        <input type="text" placeholder="Search Address..." name="macro-search" class="custom-btn"/>
-        <!-- <label for="protein">Protein</label> -->
-        <!-- <button class="custom-btn"><img src="Icons/search.png">Search Address...</button> -->
+        <input type="text" id="locationInput" placeholder="Search Address..." name="macro-search" class="custom-btn"/>
         <button class="custom-btn"><img src="Icons/pin.png">Place Pin</button>
-        <!-- <button class="custom-btn"><img src="Icons/hand.png">Pan</button> -->
-        <button class="custom-btn"><img src="Icons/search.png">Search</button>
+        <button class="custom-btn" id="search-btn"><img src="Icons/search.png">Search</button>
+    </div>
+
+    <div id="sidebar" class="sidebar">
+    <button id="close-btn">×</button>
+    <h2 div class="title">Search Results</h2>
+    <div id="resultsList" class="results-container">
+    </div>
     </div>
 
     <div class="lowerContainer">
@@ -29,13 +33,14 @@
 
                 <input type="checkbox" name="nutrient" id="fat"/>
                 <label for="fat">Fat</label>
-            </div>
-        </div>       
 
-        <!-- <button class="custom-btn"><img src="Icons/search.png">Search Address...</button>
-        <button class="custom-btn"><img src="Icons/pin.png">Place Pin</button>
-        <button class="custom-btn"><img src="Icons/hand.png">Pan</button>
-        <button class="custom-btn">Search</button> -->
-    </div>
+                <input type="checkbox" name="nutrient" id="fiber"/>
+                <label for="fiber">Fiber</label>
+            </div>
+    </div>       
+
+
+
+    <script src="main.js" defer></script>
 </body>
 </html>
