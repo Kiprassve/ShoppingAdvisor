@@ -41,7 +41,7 @@ async function performSearch() {
         <div class="price">€${item.price}</div>
         
         <div class="nutritional-info">
-          <p>B: ${item.baltymai}g | A: ${item.angliavandeniai}g | R: ${item.riebalai}g | S: ${item.skaidulos}g</p>
+          <p>Protein: ${item.baltymai}g | Carbs: ${item.angliavandeniai}g | Fat: ${item.riebalai}g | Fiber: ${item.skaidulos}g</p>
         </div>
       </div>
     `;

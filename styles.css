@@ -1,3 +1,101 @@
+
+
+.upperContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    height: fit-content; 
+    width: fit-content;
+    margin-bottom: 20px;
+}
+
+.custom-btn
+{
+    box-sizing: border-box;
+    width: 250px;
+    height: 40px;
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+
+    padding: 5px 25px;
+    border-radius: 20px;
+    border: 2px solid #4b4b4b;
+    background-color: white;
+    cursor: pointer;
+
+
+    font-size: 17px;
+    font-weight: 650;
+}
+
+
+
+button img
+{
+    width: 20px;
+    height: auto;
+
+    padding: 0px 5px 0px 0px;
+    margin: 5px 5px 5px 0px;
+}
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* ----- */
+.lowerContainer
+{
+    margin-top: auto; 
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 20px;
+}
+
+.title
+{
+    width: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.list label
+{
+    padding: 8px 25px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    border: 0.6mm solid black;
+    border-radius: 20px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.list input
+{
+    display: none;
+}
+.list input:checked + label
+{
+    color: rgb(0, 120, 230);
+    border-color: rgb(15, 150, 255);
+    background: rgb(230,245,255);
+}
+
+
+/* SIDEBAR */
+
 body {
     display: flex;
     flex-direction: column;
@@ -5,7 +103,8 @@ body {
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
-
+    background-image: url("TestingImages/BG.png");
+    background-size: 110%;
 }
 
 .upperContainer {
@@ -109,11 +208,38 @@ input[type="checkbox"] {
   width: 425px;
   position: fixed;
   top: 0;
-  right: -500px; /* Hidden by default */
+  right: -500px;
   background-color: #ffffff;
   box-shadow: -2px 0 5px rgba(0,0,0,0.2);
-  transition: right 0.3s ease; /* Smooth slide effect */
+  transition: right 0.3s ease;
   z-index: 1000;
+  
+  /* Naudojame flex, kad elementai išsidėstytų stulpeliu */
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  background-color: rgb(89, 155, 205);
+  
+  
+
+  /* Antraštė nesislankios */
+}
+
+.sidebar-header h2{
+font-family: Arial, Helvetica, sans-serif;
+    font-size: 25px;
+    text-align: center;
+    color: rgb(255, 255, 255);
+}
+
+.results-container {
+  flex-grow: 1;      /* Užpildo visą likusią vietą */
+  overflow-y: auto;  /* Įjungia vertikalų slinkimą */
+  padding: 10px;
 }
 
 #resultsList
@@ -137,6 +263,7 @@ input[type="checkbox"] {
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 12px;
+    margin: 10px;
     padding: 16px;
     margin-bottom: 12px;
     display: flex;
@@ -166,4 +293,97 @@ input[type="checkbox"] {
   margin-top: 10px;
   border-radius: 5px;
   color: #333;
+}
+
+#close-btn
+{
+    box-sizing: border-box;
+    width: 40px;
+    height: 40px;
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+
+    border-radius: 5px;
+    border: 2px solid #4b4b4b;
+    background-color: white;
+    cursor: pointer;
+
+
+    font-size: 17px;
+    font-weight: 650;
+}
+
+#resultsList
+{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.sidebar.open {
+  right: 0;
+}
+
+.sidebar.close
+{
+    right: -425px;
+}
+
+
+/* Found items */
+
+.food-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    margin: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.food-card h3 { margin: 0 0 8px 0; font-size: 1.1em; }
+.price { color: #2e7d32; font-weight: bold; }
+
+.food-img {
+  width: 40%;
+  height: 40%;
+  object-fit: cover; /* Keeps image proportional */
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 10px;
+}
+
+.card-content {
+  padding: 0 5px;
+}
+
+.nutritional-info {
+  font-size: 0.85rem;
+  background-color: #f4f4f4;
+  padding: 8px;
+  margin-top: 10px;
+  border-radius: 5px;
+  color: #333;
+}
+
+#close-btn
+{
+    box-sizing: border-box;
+    width: 40px;
+    height: 40px;
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+
+    border-radius: 5px;
+    border: 2px solid #4b4b4b;
+    background-color: white;
+    cursor: pointer;
+
+
+    font-size: 17px;
+    font-weight: 650;
 }
