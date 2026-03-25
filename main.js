@@ -28,6 +28,7 @@ async function performSearch() {
 
 // Funkcija, kuri atsakinga už sąrašo perbraižymą
 function applySortingAndRender() {
+  const sortSelect =document.getElementById("sortOptions"); // required for testing
   const sortBy = sortSelect.value;
 
   const sortedData = [...currentData].sort((a, b) => {
@@ -43,6 +44,8 @@ function applySortingAndRender() {
 
 // Funkcija, kuri tik piešia korteles
 function renderList(data) {
+
+const list = document.getElementById('resultsList');
   list.innerHTML = ''; 
   data.forEach(item => {
     const card = document.createElement('div');
@@ -78,6 +81,7 @@ function renderList(data) {
 sortSelect.addEventListener("change", applySortingAndRender);
 
 function closeSidebar() {
+  const sidebar = document.getElementById('sidebar'); //required for functioning tests Reason
   sidebar.classList.remove('open');
 }
 
