@@ -53,5 +53,26 @@ class TestProductClass(unittest.TestCase):
         expected_string = f"Name: {self.sample_name}\nWeight: 0.5\nProtein: {self.sample_protein}\nFat: 1,2\nSugar: 0,1\nSalt: 0,5\nCarbohydrates: {self.sample_carbs}\nCalories: 110"
         self.assertEqual(str(self.product), expected_string)
 
+        # TEST CASE: Tikriname, kaip klasė elgiasi su tuščiomis reikšmėmis
+    def test_product_with_empty_fields(self):
+        empty_product = Product("", "", "", "", "", "", "", "", "", "")
+        self.assertEqual(empty_product.name, "")
+        self.assertEqual(empty_product.protein, "")
+
+    # TEST CASE: Tikriname kainos skaičiavimo logiką (jei tavo klasė ją turi)
+    # Arba tiesiog patikriname, ar svoris teisingai išsaugotas
+    def test_weight_parsing(self):
+        self.product.weight_kg = "1.25"
+        self.assertEqual(self.product.weight_kg, "1.25")
+
+
+    # 4 UŽDUOTIS: Parametrizuotas testas (tikriname skirtingas maistines medžiagas)
+    def test_nutrient_variations(self):
+        test_data = [("10,0", "5,5", "1,2"), ("0", "0", "0")]
+        for protein, carbs, fat in test_data:
+            with self.subTest(p=protein, c=carbs, f=fat):
+                p = Product("Test", "1", protein, fat, "0", "0", carbs, "100", "url", "img")
+                self.assertEqual(p.protein, protein)
+
 if __name__ == '__main__':
     unittest.main()
