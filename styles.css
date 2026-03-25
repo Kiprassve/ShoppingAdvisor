@@ -269,6 +269,7 @@ font-family: Arial, Helvetica, sans-serif;
     display: flex;
     flex-direction: column;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative; /* Pridėk šią eilutę! */
 }
 
 .food-card h3 { margin: 0 0 8px 0; font-size: 1.1em; }
@@ -387,3 +388,90 @@ font-family: Arial, Helvetica, sans-serif;
     font-size: 17px;
     font-weight: 650;
 }
+
+.sort-container {
+    padding: 10px;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: Arial, sans-serif;
+    border-radius: 10px;
+}
+
+.sort-select {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.store-badge {
+    position: absolute; /* Leidžia tiksliai pozicionuoti elementą */
+    top: 10px;          /* Atstumas nuo viršaus */
+    right: 10px;        /* Atstumas nuo dešinės */
+    height: 50px;       /* Nustatome fiksuotą aukštį (gali pakoreguoti pagal poreikį) */
+
+    max-width: 120px;   /* Neleidžia Maxima logotipui užimti pusės kortelės */
+    max-height: 50px;
+
+    width: auto;        /* Plotis prisitaiko proporcingai */
+    object-fit: contain;
+    /* background-color: rgba(255, 255, 255, 0.8); /* Šiek tiek skaidrus baltas fonas užtikrina matomumą ant bet kokio paveikslėlio */
+    padding: 5px;       /* Pridedame šiek tiek erdvės aplink logotipą */
+    border-radius: 5px; /* Suapvaliname kampus */
+    z-index: 10;         /* Užtikrina, kad logotipas būtų virš prekės paveikslėlio */
+}
+
+.store-info {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+}
+
+/* Konteineris visiems ženkliukams */
+.nutr-container {
+    display: flex;
+    gap: 6px;           /* Tarpas tarp ženkliukų */
+    margin-top: 12px;
+    width: 100%;
+}
+
+/* Bendras ženkliuko stilius */
+.nutr-badge {
+    flex: 1;            /* Visi ženkliukai užima vienodą plotą */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 2px;
+    border-radius: 8px;
+    background-color: #f8f9fa; /* Labai šviesiai pilka */
+    border: 1px solid #eee;
+}
+
+/* Pavadinimas (PROT, CARB...) */
+.nutr-label {
+    font-size: 10px;
+    font-weight: bold;
+    color: #888;
+    margin-bottom: 2px;
+}
+
+/* Skaičius (6g, 50g...) */
+.nutr-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+}
+
+.controls
+{
+
+    padding-top: 50px;
+    border-radius: 8px;
+    font-family: sans-serif;
+}
+
+.radius-value { font-weight: bold; color: #007bff; }
+input[type=range] { width: 100%; cursor: pointer; }

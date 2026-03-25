@@ -7,6 +7,7 @@
     <title>Price Scraper</title>
 </head>
 <body>
+    
     <!-- Upper Buttons -->
     <div class="upperContainer">
         <input type="text" id="locationInput" placeholder="Search Address..." name="macro-search" class="custom-btn"/>
@@ -14,11 +15,22 @@
         <button class="custom-btn" id="search-btn"><img src="Icons/search.png">Search</button>
     </div>
 
+
+    
    <div id="sidebar" class="sidebar">
     <div class="sidebar-header">
-        <button id="close-btn">×</button>
-        <h2>Search Results</h2>
+    <button id="close-btn">×</button>
+    <h2>Search Results</h2>
+    <div class="sort-container">
+        <label for="sortOptions"><b>Sort by:</b></label>
+        <select id="sortOptions" class="sort-select">
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="protein-desc">Protein: High to Low</option>
+            <option value="carbs-desc">Carbs: High to Low</option>
+        </select>
     </div>
+</div>
     
     <div id="resultsList" class="results-container">
         </div>
@@ -42,7 +54,10 @@
             </div>
     </div>       
 
-
+    <div class="controls">
+    <label>Select search readius: <span id="radiusLabel" class="radius-value">5</span> km</label>
+    <input type="range" id="radiusInput" min="1" max="50" value="5">
+</div>
 
     <script src="main.js" defer></script>
 </body>
