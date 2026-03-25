@@ -28,7 +28,11 @@ function sortProducts(data, sortBy) {
     return [...data].sort((a, b) => {
         if (sortBy === "price-asc") return a.price - b.price;
         if (sortBy === "price-desc") return b.price - a.price;
+
+        if (sortBy === "protein-asc") return a.baltymai - b.baltymai;
         if (sortBy === "protein-desc") return b.baltymai - a.baltymai;
+        
+        if (sortBy === "carbs-asc") return a.angliavandeniai - b.angliavandeniai;
         if (sortBy === "carbs-desc") return b.angliavandeniai - a.angliavandeniai;
         return 0;
     });
