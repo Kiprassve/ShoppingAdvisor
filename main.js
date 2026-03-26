@@ -28,6 +28,10 @@ function sortProducts(data, sortBy) {
     return [...data].sort((a, b) => {
         if (sortBy === "price-asc") return a.price - b.price;
         if (sortBy === "price-desc") return b.price - a.price;
+// Funkcija, kuri atsakinga už sąrašo perbraižymą
+function applySortingAndRender() {
+  const sortSelect =document.getElementById("sortOptions"); // required for testing
+  const sortBy = sortSelect.value;
 
         if (sortBy === "protein-asc") return a.baltymai - b.baltymai;
         if (sortBy === "protein-desc") return b.baltymai - a.baltymai;
@@ -47,6 +51,8 @@ function applySortingAndRender() {
 
 // Funkcija, kuri tik piešia korteles
 function renderList(data) {
+
+const list = document.getElementById('resultsList');
   list.innerHTML = ''; 
   data.forEach(item => {
     const card = document.createElement('div');
@@ -82,8 +88,11 @@ function renderList(data) {
 sortSelect.addEventListener("change", applySortingAndRender);
 
 function closeSidebar() {
+  const sidebar = document.getElementById('sidebar'); //required for functioning tests Reason
   sidebar.classList.remove('open');
 }
+
+//TestofGitPush
 
 search_button.addEventListener("click", performSearch);
 sidebar_close_button.addEventListener("click", closeSidebar);
