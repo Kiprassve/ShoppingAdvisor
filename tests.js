@@ -72,11 +72,6 @@ QUnit.module("Sidebar", function () {
     assert.notOk(sidebar.classList.contains("open"), "sidebar should be closed");
   });
 
-  QUnit.test("sidebar starts without 'open' class", function (assert) {
-    const sidebar = document.getElementById("sidebar");
-    sidebar.classList.remove("open");          
-    assert.notOk(sidebar.classList.contains("open"), "sidebar should not be open by default");
-  });
 
 });
 QUnit.module("Dropdown Sorting Integration", function () {
