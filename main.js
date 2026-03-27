@@ -22,6 +22,7 @@ async function performSearch() {
     console.error("Klaida gaunant duomenis:", error);
     list.innerHTML = '<p style="color:red;">Failed to connect to the scraper server.</p>';
   }
+<<<<<<< HEAD
 }
 
 function sortProducts(data, sortBy) {
@@ -43,12 +44,36 @@ if (sortBy === "price-desc") return b.price - a.price;
         return 0;
     });
     
+=======
+>>>>>>> 375b8ea2cc5dda8cf2cfba8ea1db4528d46ef861
+}
+
+function sortProducts(data, sortBy) {
+    return [...data].sort((a, b) => {
+        if (sortBy === "price-asc") return a.price - b.price;
+        if (sortBy === "price-desc") return b.price - a.price;
+// Funkcija, kuri atsakinga už sąrašo perbraižymą
+function applySortingAndRender() {
+<<<<<<< HEAD
+  const sortSelect =document.getElementById("sortOptions");
+    sortBy = sortSelect.value;
+=======
+  const sortSelect =document.getElementById("sortOptions"); // required for testing
+  const sortBy = sortSelect.value;
+
+        if (sortBy === "protein-asc") return a.baltymai - b.baltymai;
+        if (sortBy === "protein-desc") return b.baltymai - a.baltymai;
+        
+        if (sortBy === "carbs-asc") return a.angliavandeniai - b.angliavandeniai;
+        if (sortBy === "carbs-desc") return b.angliavandeniai - a.angliavandeniai;
+        return 0;
+    });
 }
 
 // Funkcija, kuri atsakinga už sąrašo perbraižymą
 function applySortingAndRender() {
-  const sortSelect =document.getElementById("sortOptions");
-    sortBy = sortSelect.value;
+    const sortBy = sortSelect.value;
+>>>>>>> 375b8ea2cc5dda8cf2cfba8ea1db4528d46ef861
     const sortedData = sortProducts(currentData, sortBy);
     renderList(sortedData);
 }
