@@ -8,41 +8,80 @@ let currentData = []; // Čia saugosime gautus produktus
 const sortSelect = document.getElementById("sortOptions");
 
 async function performSearch() {
-  list.innerHTML = '<p>Searching...</p>';
+  list.innerHTML = '<p>Searching products in Rimi... (this may take a minute)</p>';
   sidebar.classList.add('open');
 
-  // Imituojame duomenų gavimą
-  const mockData = await new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        { name: "Raudonos besėklės vynuogės", store: "Maxima", storeLogo: "Icons/maxima_logo.png", price: 12.99, image: "TestingImages/Grapes.jfif", baltymai: 0.7, angliavandeniai: 17, riebalai: 0.2, skaidulos: 0.9 },
-        { name: "ŽEMAITIJOS sviestas, 82 % rieb.", store: "Lidl", storeLogo: "Icons/lidl_logo.png", price: 9.50, image: "TestingImages/Butter.jfif", baltymai: 0.6, angliavandeniai: 0.6, riebalai: 82, skaidulos: 0 },
-        { name: "Bulvių traškučiai ESTRELLA", store: "Iki", storeLogo: "Icons/iki_logo.png", price: 8.75, image: "TestingImages/Chips.jfif", baltymai: 6, angliavandeniai: 50, riebalai: 32, skaidulos: 4 }
-      ]);
-    }, 1000);
-  });
+  try {
+    // Kreipiamės į mūsų Python Flask serverį
+    const response = await fetch('http://127.0.0.1:5000/api/scrape');
+    const realData = await response.json();
 
-  currentData = mockData; // Išsaugojame duomenis
-  applySortingAndRender(); // Iškviečiame rūšiavimą ir atvaizdavimą
+    currentData = realData; 
+    applySortingAndRender(); 
+  } catch (error) {
+    console.error("Klaida gaunant duomenis:", error);
+    list.innerHTML = '<p style="color:red;">Failed to connect to the scraper server.</p>';
+  }
+<<<<<<< HEAD
+}
+
+function sortProducts(data, sortBy) {
+  const sortSelect =document.getElementById("sortOptions"); // required for testing
+   sortBy = sortSelect.value;
+return [...data].sort((a, b) => {
+if (sortBy === "price-asc") return a.price - b.price;
+if (sortBy === "price-desc") return b.price - a.price;
+// Funkcija, kuri atsakinga už sąrašo perbraižymą
+
+  
+  
+
+        if (sortBy === "protein-asc") return a.baltymai - b.baltymai;
+        if (sortBy === "protein-desc") return b.baltymai - a.baltymai;
+        
+        if (sortBy === "carbs-asc") return a.angliavandeniai - b.angliavandeniai;
+        if (sortBy === "carbs-desc") return b.angliavandeniai - a.angliavandeniai;
+        return 0;
+    });
+    
+=======
+>>>>>>> 375b8ea2cc5dda8cf2cfba8ea1db4528d46ef861
+}
+
+function sortProducts(data, sortBy) {
+    return [...data].sort((a, b) => {
+        if (sortBy === "price-asc") return a.price - b.price;
+        if (sortBy === "price-desc") return b.price - a.price;
+// Funkcija, kuri atsakinga už sąrašo perbraižymą
+function applySortingAndRender() {
+<<<<<<< HEAD
+  const sortSelect =document.getElementById("sortOptions");
+    sortBy = sortSelect.value;
+=======
+  const sortSelect =document.getElementById("sortOptions"); // required for testing
+  const sortBy = sortSelect.value;
+
+        if (sortBy === "protein-asc") return a.baltymai - b.baltymai;
+        if (sortBy === "protein-desc") return b.baltymai - a.baltymai;
+        
+        if (sortBy === "carbs-asc") return a.angliavandeniai - b.angliavandeniai;
+        if (sortBy === "carbs-desc") return b.angliavandeniai - a.angliavandeniai;
+        return 0;
+    });
 }
 
 // Funkcija, kuri atsakinga už sąrašo perbraižymą
 function applySortingAndRender() {
-  const sortBy = sortSelect.value;
-
-  const sortedData = [...currentData].sort((a, b) => {
-    if (sortBy === "price-asc") return a.price - b.price;
-    if (sortBy === "price-desc") return b.price - a.price;
-    if (sortBy === "protein-desc") return b.baltymai - a.baltymai;
-    if (sortBy === "carbs-desc") return b.angliavandeniai - a.angliavandeniai;
-    return 0;
-  });
-
-  renderList(sortedData);
+    const sortBy = sortSelect.value;
+>>>>>>> 375b8ea2cc5dda8cf2cfba8ea1db4528d46ef861
+    const sortedData = sortProducts(currentData, sortBy);
+    renderList(sortedData);
 }
 
 // Funkcija, kuri tik piešia korteles
 function renderList(data) {
+
+const list = document.getElementById('resultsList');
   list.innerHTML = ''; 
   data.forEach(item => {
     const card = document.createElement('div');
@@ -78,8 +117,11 @@ function renderList(data) {
 sortSelect.addEventListener("change", applySortingAndRender);
 
 function closeSidebar() {
+  const sidebar = document.getElementById('sidebar'); //required for functioning tests Reason
   sidebar.classList.remove('open');
 }
+
+//TestofGitPush
 
 search_button.addEventListener("click", performSearch);
 sidebar_close_button.addEventListener("click", closeSidebar);
