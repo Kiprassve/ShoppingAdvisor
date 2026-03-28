@@ -119,7 +119,7 @@ def Rimi_crawler(url):
                                 label=cells[0].text.strip().lower()
                                 if re.search(r'energin.*?vert', label, re.IGNORECASE):#calories
                                     
-                                    value=re.search(r'(\d+)\s*kcal', cells[1].text.strip().lower())
+                                    value=re.search(r'(\d+\.?\d*)\s*kcal', cells[1].text.strip().lower())
                                     if value:
                                         print(f"{cells[0].text}: {value.group(1)}")
                                         calories=value.group(1)
@@ -153,8 +153,8 @@ def Rimi_crawler(url):
                                     if value:
                                         print(f"{cells[0].text}: {value.group(1)}")
                                         sugar=value.group(1)
-                    #product_obj=Product.Product(str(name),str(weight),str(protein),str(fat),str(sugar),str(salt),str(carbs),str(calories),"https://www.rimi.lt"+str(prod_ulr.get("href")),str(img_url))
-                    #All_Products.append(product_obj)
+                    # product_obj=Product.Product(str(name),str(weight),str(protein),str(fat),str(sugar),str(salt),str(carbs),str(calories),"https://www.rimi.lt"+str(prod_ulr.get("href")),str(img_url))
+                    # All_Products.append(product_obj)
                     
         nextpage=soup.find_all("li", class_="pagination__item -chevron")
         nextpage=nextpage[1]#finds the next page button, if it exists
@@ -188,12 +188,6 @@ def Rimi_crawler(url):
 
 
 #------------------------------IKI CRAWLER---------------------------------
-
-
-
-
-
-
 headers2 = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json",
@@ -285,7 +279,7 @@ payload_categories_all={
 
 global_categorys=[]
 IKI_url_categories="https://searchservice-952707942140.europe-north1.run.app/categories"
-
+#Gets categorys of products like "Milk products"
 def categorie_grabber(url):
     for slug in slugs:
         #print(slug)
@@ -318,6 +312,7 @@ def categorie_grabber(url):
 categorie_grabber(IKI_url_categories)
 
 categoryIds=[]
+#Gets subcategorys of products. "Milk procducts" -> "Milk", "Cheeses", "Ice cream" ...
 def subcategorie_grabber(url):
     response=requests.post(url,headers=headers2, json=payload_categories_all)
     
@@ -362,7 +357,7 @@ payload={
 
 IKI_url_API="https://searchservice-952707942140.europe-north1.run.app/v1/frontend-products"
 
-
+#Gets the products from the IKI website
 def IKI_crawler(url):
    
     #print(response.text)
@@ -406,7 +401,12 @@ def IKI_crawler(url):
                         sugar=str(product.get('nutrition').get('sugar',0))
                         salt=str(product.get('nutrition').get('salt',0))
                         carbs=str(product.get('nutrition').get('carbs',0))
+
                         calories=str(product.get('nutrition').get('energy',0))
+                        calories_re=re.search(r'(\d+\.?\,?\d*)\s*kcal', calories.lower())
+                        if calories_re:
+                             calories=calories_re.group(1)
+
                         img_url=str(product.get('photoUrl',0)) 
                         price=str(product.get('actualPrice',0))
                         price_discount=str(product.get('loyaltyPrice',0))
@@ -433,7 +433,7 @@ def IKI_crawler(url):
 
 All_Products2=[]
 All_Products2=IKI_crawler(IKI_url_API)
-
+#Writes products into a file
 if All_Products2:
     data_to_json2=[product.__dict__ for product in All_Products2]
     with open("IKI_products.json", "w", encoding="utf-8") as f:
