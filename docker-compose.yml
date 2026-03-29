@@ -1,0 +1,12 @@
+services:
+  api:
+    build: ./Backend
+    ports:
+      - "5000:5000"
+  
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
