@@ -1,0 +1,6 @@
+Docker naudojimas:
+1. Parsisiųskite Docker Desktop
+2. Right click ant projekto aplankalo -> Open in Terminal
+3. Įveskite komandą: docker-compose up --build
+
+Jei norite sustabdyti per terminal įveskite docker-compose down

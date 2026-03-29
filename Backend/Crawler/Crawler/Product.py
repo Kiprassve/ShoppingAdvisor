@@ -1,6 +1,5 @@
 from os import name
 from signal import default_int_handler
-from tkinter import SE
 
 
 class Product(object):

@@ -8,3 +8,11 @@ __pycache__/
 # Optional but recommended
 *.log
 *.tmp
+
+# Docker
+.dockerignore
+__pycache__/
+*.pyc
+
+# Local environment
+.env
