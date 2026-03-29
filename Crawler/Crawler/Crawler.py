@@ -71,18 +71,24 @@ def Rimi_crawler(url):
                 name=div_name.get("data-gtms-banner-title")
                 #print(name)
             #find weight
+            conversion_measure="" #unite of measure like kg,l,g,ml
             if name:
                 weight_re=re.search(r'(\d+[,.]?\d*)\s*(g|kg|l|ml)\b',str(name),re.IGNORECASE)
                 if weight_re:
                     if weight_re.group(2) in ["kg", "l"]:
                         weight=weight_re.group(0).replace("kg","").replace("l","").replace(",",".")
                         weight=str(weight)
+                        conversion_measure=str(weight_re.group(2))
+                        
                     elif weight_re.group(2) in ["g", "ml"]:
                          weight=float(weight_re.group(0).replace("g","").replace("ml","").replace(",","."))
                          weight=weight/1000
                          weight=str(weight)
+                         conversion_measure=str(weight_re.group(2))
+                         
                 else:
                     weight="1"
+                   
                     
                 
             
@@ -90,8 +96,34 @@ def Rimi_crawler(url):
             response=requests.get("https://www.rimi.lt"+str(prod_ulr.get("href")),headers=headers)# creates product link
            
             soup2=BeautifulSoup((response.content),"html.parser")
-           
             
+            actualprice=discountedprice="0"
+            price_div = soup2.find_all('div')
+
+            for p in price_div:
+                   cents=p.find("span", class_="cents")
+                   euros=p.find("span", class_="major")
+                   price_class=p.get('class')
+                   if cents and euros:
+                        cents_re=re.search(r'\d+',str(cents))
+                        euros_re=re.search(r'\d+',str(euros))
+                        #print(str(euros)+" "+str(cents))
+                        if cents_re and euros_re:
+                            discountedprice=str(euros_re.group(0))+"."+str(cents_re.group(0))
+                   if price_class and "price" in price_class:       
+                       euro_re=re.search(r'\d+',str(p.find("span")))
+                       cent_re=re.search(r'\d+',str(p.find("sup")))
+                       if cent_re and euro_re:
+                           actualprice=str(euro_re.group(0))+"."+str(cent_re.group(0))
+           
+                       oldprice=p.find("p", class_="price__old-price")
+                       #print(oldprice)
+                       if oldprice:
+              
+                           discountedprice=actualprice
+                           actualprice_re=re.search(r'\d+\.?\,?\d*',str(oldprice))
+                           if actualprice_re:
+                               actualprice=actualprice_re.group(0)
         
 
             # Finds tables that are turned into scrips 
@@ -153,8 +185,8 @@ def Rimi_crawler(url):
                                     if value:
                                         print(f"{cells[0].text}: {value.group(1)}")
                                         sugar=value.group(1)
-                    # product_obj=Product.Product(str(name),str(weight),str(protein),str(fat),str(sugar),str(salt),str(carbs),str(calories),"https://www.rimi.lt"+str(prod_ulr.get("href")),str(img_url))
-                    # All_Products.append(product_obj)
+                    product_obj=Product.Product(str(name),str(weight),str(conversion_measure),str(protein),str(fat),str(sugar),str(salt),str(carbs),str(calories),"https://www.rimi.lt"+str(prod_ulr.get("href")),str(img_url),actualprice,discountedprice)
+                    All_Products.append(product_obj)
                     
         nextpage=soup.find_all("li", class_="pagination__item -chevron")
         nextpage=nextpage[1]#finds the next page button, if it exists
@@ -176,17 +208,55 @@ def Rimi_crawler(url):
         else:
             url=None
     return All_Products
-# All_Products=[]
-# for url in urls:
-#     All_Products=All_Products+Rimi_crawler(url)
+All_Products=[]
+
+for url in urls:
+    All_Products=All_Products+Rimi_crawler(url)
+    break
 
 
-# data_to_json=[product.__dict__ for product in All_Products]
+data_to_json=[product.__dict__ for product in All_Products]
 
-# with open("products.json", "w", encoding="utf-8") as f:
-#     json.dump(data_to_json, f, ensure_ascii=False, indent=4)
+with open("products.json", "w", encoding="utf-8") as f:
+    json.dump(data_to_json, f, ensure_ascii=False, indent=4)
 
 
+
+# Sviestas="https://www.rimi.lt/e-parduotuve/lt/produktai/bakaleja/cukrus-ir-saldikliai/baltasis-cukrus-/cukrus-panevezio-plius-1-kg/p/148646"
+# response=requests.get(Sviestas,headers=headers)
+# soup2=BeautifulSoup((response.content),"html.parser")
+# actualprice=discountedprice="0"
+# price_div = soup2.find_all('div')
+
+# for p in price_div:
+#        cents=p.find("span", class_="cents")
+#        euros=p.find("span", class_="major")
+#        price_class=p.get('class')
+#        if cents and euros:
+#             cents_re=re.search(r'\d+',str(cents))
+#             euros_re=re.search(r'\d+',str(euros))
+#             #print(str(euros)+" "+str(cents))
+#             if cents_re and euros_re:
+#                 discountedprice=str(euros_re.group(0))+"."+str(cents_re.group(0))
+#        if price_class and "price" in price_class:       
+#            euro_re=re.search(r'\d+',str(p.find("span")))
+#            cent_re=re.search(r'\d+',str(p.find("sup")))
+#            if cent_re and euro_re:
+#                actualprice=str(euro_re.group(0))+"."+str(cent_re.group(0))
+           
+#            oldprice=p.find("p", class_="price__old-price")
+#            #print(oldprice)
+#            if oldprice:
+              
+#                discountedprice=actualprice
+#                actualprice_re=re.search(r'\d+\.?\,?\d*',str(oldprice))
+#                if actualprice_re:
+#                    actualprice=actualprice_re.group(0)
+               
+# if actualprice!="0" or discountedprice!="0":
+#       print("Actual price:"+ str(actualprice))
+#       print("Discounted price:"+str(discountedprice))
+  
 #------------------------------IKI CRAWLER---------------------------------
 headers2 = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -309,7 +379,7 @@ def categorie_grabber(url):
     #         print(g_category)
     print("category grabber done")
                                         
-categorie_grabber(IKI_url_categories)
+#categorie_grabber(IKI_url_categories)
 
 categoryIds=[]
 #Gets subcategorys of products. "Milk procducts" -> "Milk", "Cheeses", "Ice cream" ...
@@ -331,7 +401,7 @@ def subcategorie_grabber(url):
                 # print(category.get('id'))
     print("sub category grabber done")
     
-subcategorie_grabber(IKI_url_categories)
+#subcategorie_grabber(IKI_url_categories)
 
 
 payload={
@@ -431,13 +501,13 @@ def IKI_crawler(url):
       
         fromIndex=fromIndex+limit
 
-All_Products2=[]
-All_Products2=IKI_crawler(IKI_url_API)
-#Writes products into a file
-if All_Products2:
-    data_to_json2=[product.__dict__ for product in All_Products2]
-    with open("IKI_products.json", "w", encoding="utf-8") as f:
-        json.dump(data_to_json2, f, ensure_ascii=False, indent=4)
+# All_Products2=[]
+# All_Products2=IKI_crawler(IKI_url_API)
+# #Writes products into a file
+# if All_Products2:
+#     data_to_json2=[product.__dict__ for product in All_Products2]
+#     with open("IKI_products.json", "w", encoding="utf-8") as f:
+#         json.dump(data_to_json2, f, ensure_ascii=False, indent=4)
 
 
 
