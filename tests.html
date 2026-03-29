@@ -1,0 +1,32 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tests</title>
+  <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.20.0.css">
+</head>
+<body>
+
+  <div id="qunit"></div>
+  <div id="qunit-fixture">
+
+    <button id="search-btn"></button>
+    <button id="close-btn"></button>
+    <div id="sidebar" class="sidebar"></div>
+    <div id="resultsList"></div>
+    <select id="sortOptions">
+      <option value="price-asc">Price: Low to High</option>
+      <option value="price-desc">Price: High to Low</option>
+      <option value="protein-desc">Protein: High to Low</option>
+      <option value="carbs-desc">Carbs: High to Low</option>
+    </select>
+
+  </div>
+
+  <script src="https://code.jquery.com/qunit/qunit-2.20.0.js"></script>
+  <script src="main.js"></script>
+  <script src="tests.js"></script>
+
+</body>
+</html>
