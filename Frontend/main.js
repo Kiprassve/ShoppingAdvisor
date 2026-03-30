@@ -8,7 +8,7 @@ let currentData = []; // Čia saugosime gautus produktus
 const sortSelect = document.getElementById("sortOptions");
 
 async function performSearch() {
-  list.innerHTML = '<p>Searching products in Rimi... (this may take a minute)</p>';
+  list.innerHTML = '<p>Searching for products (this may take a minute)</p>';
   sidebar.classList.add('open');
 
   try {
@@ -70,6 +70,10 @@ function renderList(data) {
       <div class="nutr-badge fat">
         <span class="nutr-label">FAT</span>
         <span class="nutr-value">${item.riebalai}g</span>
+      </div>
+      <div class="nutr-badge calories">
+        <span class="nutr-label">CALORIES</span>
+        <span class="nutr-value">${item.calories} kcal</span>
       </div>
     </div>
   </div>

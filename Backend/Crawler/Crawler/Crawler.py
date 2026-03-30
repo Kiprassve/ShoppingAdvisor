@@ -9,14 +9,13 @@ from pydoc import pager
 from re import U, RegexFlag
 from sqlite3 import SQLITE_CREATE_INDEX
 from time import thread_time_ns
-from tkinter import N
 from urllib import request, response
 from xml.etree.ElementInclude import include
 import requests
 from bs4 import BeautifulSoup
 import time
 
-import Product
+from . import Product
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -52,6 +51,9 @@ def Rimi_crawler(url):
     
     
         for item in soup.find_all("li", class_="product-grid__item"):# goes through each product on the page
+            if i >= 10:
+                break
+            
             #writes produkt url
             i=i+1
             weight=img_url=name=protein=fat=sugar=salt=carbs=calories="0"
@@ -188,6 +190,9 @@ def Rimi_crawler(url):
                     product_obj=Product.Product(str(name),str(weight),str(conversion_measure),str(protein),str(fat),str(sugar),str(salt),str(carbs),str(calories),"https://www.rimi.lt"+str(prod_ulr.get("href")),str(img_url),actualprice,discountedprice)
                     All_Products.append(product_obj)
                     
+        if i >= 10:
+            break
+        
         nextpage=soup.find_all("li", class_="pagination__item -chevron")
         nextpage=nextpage[1]#finds the next page button, if it exists
         if nextpage:
@@ -207,18 +212,19 @@ def Rimi_crawler(url):
 
         else:
             url=None
+            
     return All_Products
-All_Products=[]
+# All_Products=[]
 
-for url in urls:
-    All_Products=All_Products+Rimi_crawler(url)
-    break
+# for url in urls:
+#     All_Products=All_Products+Rimi_crawler(url)
+#     break
 
 
-data_to_json=[product.__dict__ for product in All_Products]
+# data_to_json=[product.__dict__ for product in All_Products]
 
-with open("products.json", "w", encoding="utf-8") as f:
-    json.dump(data_to_json, f, ensure_ascii=False, indent=4)
+# with open("products.json", "w", encoding="utf-8") as f:
+#     json.dump(data_to_json, f, ensure_ascii=False, indent=4)
 
 
 
@@ -454,7 +460,9 @@ def IKI_crawler(url):
                       return All_Products                 
                 i=0
                 for item in data.get('products'):
-                    
+                    if i > 15:
+                        break
+
                     weight_kg="1"
                     protein=fat=sugar=salt=carbs=calories=conversion_measure=price=price_discount="0"
                     product=item.get("frontEndProduct", {})

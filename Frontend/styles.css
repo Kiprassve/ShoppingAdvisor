@@ -52,13 +52,24 @@ input[type="checkbox"] {
 .lowerContainer
 {
     margin-top: auto; 
-    
+
+
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
     padding-bottom: 20px;
 }
+
+/* .nutrients
+{
+    background-color: rgba(63, 79, 133, 0.324);
+    padding-bottom: 25px;
+    padding-top: 10px;
+    padding-left: 25px;
+    padding-right: 25px;
+    border-radius: 25px;
+} */
 
 .title
 {
