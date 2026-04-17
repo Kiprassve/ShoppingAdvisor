@@ -5,14 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
     <title>Price Scraper</title>
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
+
+<div id="map" ></div>
+
     
     <!-- Upper Buttons -->
     <div class="upperContainer">
         <input type="text" id="locationInput" placeholder="Search Address..." name="macro-search" class="custom-btn"/>
-        <button class="custom-btn"><img src="../Backend/static/Icons/pin.png">Place Pin</button>
-        <button class="custom-btn" id="search-btn"><img src="../Backend/static/Icons/search.png">Search</button>
+        <button class="custom-btn"><img src="Icons/pin.png">Place Pin</button>
+        <button class="custom-btn" id="search-btn"><img src="Icons/search.png">Search</button>
     </div>
 
 
@@ -58,14 +63,17 @@
 
                 <input type="checkbox" name="nutrient" id="fat"/>
                 <label for="fat">Fat</label>
+
+                <input type="checkbox" name="nutrient" id="fiber"/>
+                <label for="fiber">Fiber</label>
             </div>
     </div>       
 
     <div class="controls">
     <label>Select search readius: <span id="radiusLabel" class="radius-value">5</span> km</label>
-    <input type="range" id="radiusInput" min="1" max="50" value="5">
+    <input type="range" id="radiusInput" min="0.1" max="10" value="5">
 </div>
 
-    <script src="main.js" defer></script>
+        <script src="main.js" defer></script>
 </body>
 </html>
