@@ -1,10 +1,40 @@
+version: '3.8'
+
 services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: map_demo
+    ports:
+      - "5432:5432"
+
+  importer:
+    image: ubuntu:22.04
+    depends_on:
+      - db
+    volumes:
+      - ./data:/osm
+    environment:
+     - PGPASSWORD=password123
+     - DEBIAN_FRONTEND=noninteractive
+    command: >
+      bash -c "apt-get update && apt-get install -y osm2pgsql && 
+      echo 'Waiting 10 seconds for database to fully start...' && sleep 10 &&
+      osm2pgsql -c -d map_demo -U postgres -H db /osm/map_data.osm.pbf"
+
   api:
     build: 
       context: ./Backend
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
+    environment:
+      # Pass the database credentials into Python
+      - DATABASE_URL=postgresql://postgres:password123@db:5432/map_demo
+    depends_on:
+      - db
     restart: always
 
   web:

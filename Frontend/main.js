@@ -95,7 +95,12 @@ function closeSidebar() {
   sidebar.classList.remove('open');
 }
 
+
 let map;
+
+let storeMarkersGroup;
+
+
 function instantiateMap(){
    map = L.map('map',{
     doubleClickZoom: false,
@@ -111,11 +116,11 @@ function instantiateMap(){
     }).addTo(map);
 
     map.on('dblclick', function(e){
-      console.log("double");
     latitude= e.latlng.lat;
     longitude = e.latlng.lng; 
     DrawCircle();    
     });
+     storeMarkersGroup = L.layerGroup().addTo(map);
 }
 
 
@@ -137,10 +142,63 @@ let currentMarker;
   radiusLabel.textContent= searchRadius;
     currentMarker = L.marker([latitude,longitude]).addTo(map);
   currentCircle = L.circle([latitude, longitude], { radius: searchRadius * 1000}).addTo(map);
-  
 }
+
+let rimiIcon = L.icon({iconUrl: '/Backend/static\\icons/rimi_logo.png', 
+    iconSize:     [32, 32], 
+    iconAnchor:   [16, 32], 
+    popupAnchor:  [0, -32]  }); 
+
+let MaximaIcon = L.icon({iconUrl: '/Backend/static\\icons/maxima_logo.png', 
+    iconSize:     [32, 32], 
+    iconAnchor:   [16, 32], 
+    popupAnchor:  [0, -32]  }); 
+
+let ikiIcon = L.icon({iconUrl: '/Backend/static\\icons/iki_logo.png', 
+    iconSize:     [32, 32], 
+    iconAnchor:   [16, 32], 
+    popupAnchor:  [0, -32]  }); 
+
+async function GetStores (){
+  storeMarkersGroup.clearLayers();
+  
+  console.log("Getting stores");
+  // imprlement proper error throw and error if no circle present
+  if(!currentCircle){
+    console.error("No circle");
+  } 
+  const KmRadius = searchRadius*1000;
+  
+  const url =  `http://localhost:5000/api/stores?lat=${latitude}&lon=${longitude}&radius=${KmRadius}`;
+
+  try{
+    const response = await fetch(url);
+    const stores = await response.json(); //changed
+    stores.forEach(store =>{
+       if(/Maxima.*/i.test(store.name)){
+        L.marker([store.lat, store.lon], {icon: MaximaIcon}).addTo(storeMarkersGroup).bindPopup(`<b>${store.name}</b>`);
+       }
+
+       if(/Rimi.*/i.test(store.name)){
+        L.marker([store.lat, store.lon], {icon: rimiIcon}).addTo(storeMarkersGroup).bindPopup(`<b>${store.name}</b>`);
+       }
+
+       if(/Iki.*/i.test(store.name)){
+        L.marker([store.lat, store.lon], { icon : ikiIcon}).addTo(storeMarkersGroup).bindPopup(`<b>${store.name}</b>`);
+       }
+
+
+    });
+  }
+  catch(error){
+    console.error("map error:",error);
+  }
+
+
+}
+
 
 radiusInput.addEventListener("input",function(){searchRadius=radiusInput.value; DrawCircle();});
 document.addEventListener("DOMContentLoaded",instantiateMap);
-search_button.addEventListener("click", performSearch);
+search_button.addEventListener("click", function(){performSearch; GetStores();});
 sidebar_close_button.addEventListener("click", closeSidebar);
