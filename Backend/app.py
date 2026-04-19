@@ -86,7 +86,7 @@ def get_data():
         except Exception as e:
             print(f"Klaida skaitant Iki failą: {e}")
 
-    # Grąžiname visus surinktus duomenis (apribojame nuo 770 iki 810)
+    # Grąžiname visus surinktus duomenis (apribojame nuo 800 iki 830)
     return jsonify(data[800:830])
 
 @app.route('/api/stores', methods=['GET'])
