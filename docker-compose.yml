@@ -28,11 +28,14 @@ services:
     build: 
       context: ./Backend
       dockerfile: Dockerfile
+    volumes:
+      - ./Backend:/app
     ports:
       - "5000:5000"
     environment:
       # Pass the database credentials into Python
       - DATABASE_URL=postgresql://postgres:password123@db:5432/map_demo
+      - PYTHONPATH=/app:/app/Crawler:/app/Crawler/Crawler
     depends_on:
       - db
     restart: always

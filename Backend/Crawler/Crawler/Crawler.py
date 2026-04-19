@@ -2,6 +2,7 @@
 from calendar import c
 from dataclasses import dataclass
 from os import name
+import os
 from pickle import TRUE
 import re
 import json
@@ -15,7 +16,7 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-from . import Product
+import Product
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -51,8 +52,7 @@ def Rimi_crawler(url):
     
     
         for item in soup.find_all("li", class_="product-grid__item"):# goes through each product on the page
-            if i >= 10:
-                break
+            
             
             #writes produkt url
             i=i+1
@@ -91,9 +91,6 @@ def Rimi_crawler(url):
                 else:
                     weight="1"
                    
-                    
-                
-            
 
             response=requests.get("https://www.rimi.lt"+str(prod_ulr.get("href")),headers=headers)# creates product link
            
@@ -187,11 +184,11 @@ def Rimi_crawler(url):
                                     if value:
                                         print(f"{cells[0].text}: {value.group(1)}")
                                         sugar=value.group(1)
-                    product_obj=Product.Product(str(name),str(weight),str(conversion_measure),str(protein),str(fat),str(sugar),str(salt),str(carbs),str(calories),"https://www.rimi.lt"+str(prod_ulr.get("href")),str(img_url),actualprice,discountedprice)
-                    All_Products.append(product_obj)
+                    if(actualprice!="0" or discountedprice!="0"):                    
+                        product_obj=Product.Product(str(name),str(weight),str(conversion_measure),str(protein),str(fat),str(sugar),str(salt),str(carbs),str(calories),"https://www.rimi.lt"+str(prod_ulr.get("href")),str(img_url),actualprice,discountedprice)
+                        All_Products.append(product_obj)
                     
-        if i >= 10:
-            break
+      
         
         nextpage=soup.find_all("li", class_="pagination__item -chevron")
         nextpage=nextpage[1]#finds the next page button, if it exists
@@ -214,20 +211,23 @@ def Rimi_crawler(url):
             url=None
             
     return All_Products
-# All_Products=[]
+if __name__ == "__main__":
+    # 1. Gauname aplanką, kuriame yra šis Crawler.py failas
+    current_dir = os.path.dirname(os.path.abspath(__file__))
 
-# for url in urls:
-#     All_Products=All_Products+Rimi_crawler(url)
-#     break
+    # 2. Sujungiame tą aplanką su failo pavadinimu
+    file_path = os.path.join(current_dir, "products.json")
+    All_Products=[]
+
+    for url in urls:
+        All_Products=All_Products+Rimi_crawler(url)
+        break
+    data_to_json=[product.__dict__ for product in All_Products]
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data_to_json, f, ensure_ascii=False, indent=4)
 
 
-# data_to_json=[product.__dict__ for product in All_Products]
-
-# with open("products.json", "w", encoding="utf-8") as f:
-#     json.dump(data_to_json, f, ensure_ascii=False, indent=4)
-
-
-
+#---TESTAS-----
 # Sviestas="https://www.rimi.lt/e-parduotuve/lt/produktai/bakaleja/cukrus-ir-saldikliai/baltasis-cukrus-/cukrus-panevezio-plius-1-kg/p/148646"
 # response=requests.get(Sviestas,headers=headers)
 # soup2=BeautifulSoup((response.content),"html.parser")
@@ -385,7 +385,7 @@ def categorie_grabber(url):
     #         print(g_category)
     print("category grabber done")
                                         
-#categorie_grabber(IKI_url_categories)
+categorie_grabber(IKI_url_categories)
 
 categoryIds=[]
 #Gets subcategorys of products. "Milk procducts" -> "Milk", "Cheeses", "Ice cream" ...
@@ -407,7 +407,7 @@ def subcategorie_grabber(url):
                 # print(category.get('id'))
     print("sub category grabber done")
     
-#subcategorie_grabber(IKI_url_categories)
+subcategorie_grabber(IKI_url_categories)
 
 
 payload={
@@ -471,7 +471,7 @@ def IKI_crawler(url):
                         # print(f"\nBaltymai: {product.get('nutrition').get('protein')} \nRiebalai: {product.get('nutrition').get('fat')} \nEnergetine verte: {product.get('nutrition').get('energy')} \nCukrus: {product.get('nutrition').get('sugar')}")
                         # print(f"Angliavandeniai: {product.get('nutrition').get('carbs')} \nDruska: {product.get('nutrition').get('salt')} \n")
                         name=str(product.get("name").get("lt"))                  
-                        weight_kg=str(product.get('conversionValue',0))#-------------------------------------------pasiziureti kaip konvertonasi svoris nes jis pre json faila atrodo netikslus
+                        weight_kg=str(product.get('conversionValue',0))
                        
                         conversion_measure=str(product.get('conversionMeasure',0))
                         protein=str(product.get('nutrition').get('protein',0))
@@ -509,10 +509,17 @@ def IKI_crawler(url):
       
         fromIndex=fromIndex+limit
 
-# All_Products2=[]
-# All_Products2=IKI_crawler(IKI_url_API)
-# #Writes products into a file
-# if All_Products2:
-#     data_to_json2=[product.__dict__ for product in All_Products2]
-#     with open("IKI_products.json", "w", encoding="utf-8") as f:
-#         json.dump(data_to_json2, f, ensure_ascii=False, indent=4)
+
+""" if __name__ == "__main__":
+    # 1. Gauname aplanką, kuriame yra šis Crawler.py failas
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    # 2. Sujungiame tą aplanką su failo pavadinimu
+    file_path = os.path.join(current_dir, "IKI_products.json")
+
+    All_Products2=[]
+    All_Products2=IKI_crawler(IKI_url_API)
+    #Writes products into a file
+    if All_Products2:
+        data_to_json2=[product.__dict__ for product in All_Products2]
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data_to_json2, f, ensure_ascii=False, indent=4) """

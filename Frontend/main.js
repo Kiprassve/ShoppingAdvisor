@@ -96,6 +96,7 @@ function closeSidebar() {
 }
 
 
+//------------------------------MAP RELATED CODE----------------------------------
 let map;
 
 let storeMarkersGroup;
@@ -177,10 +178,12 @@ async function GetStores (){
     stores.forEach(store =>{
        if(/Maxima.*/i.test(store.name)){
         L.marker([store.lat, store.lon], {icon: MaximaIcon}).addTo(storeMarkersGroup).bindPopup(`<b>${store.name}</b>`);
+
        }
 
        if(/Rimi.*/i.test(store.name)){
         L.marker([store.lat, store.lon], {icon: rimiIcon}).addTo(storeMarkersGroup).bindPopup(`<b>${store.name}</b>`);
+        
        }
 
        if(/Iki.*/i.test(store.name)){

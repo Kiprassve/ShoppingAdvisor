@@ -1,3 +1,4 @@
+import json
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from Crawler.Crawler.Crawler import Rimi_crawler
@@ -11,39 +12,82 @@ DB_URL = os.environ.get("DATABASE_URL","postgresql://postgres:password123@db:543
 
 @app.route('/api/scrape', methods=['GET'])
 def get_data():
-    # URL kintamasis turi būti ČIA, funkcijos viduje
-    url = "https://www.rimi.lt/e-parduotuve/lt/produktai/mesa-ir-zuvis-/c/SH-9?currentPage=1&pageSize=80"
+    base_path = os.path.dirname(os.path.abspath(__file__))
     
-    print("Pradedamas skreipinimas...")
-    products_objects = Rimi_crawler(url)
-    
-    data = []
-    for p in products_objects:
-        try:
-            # Tavo esama logika su kainomis ir baltymais...
-            p_discount = str(p.price_discount).replace(',', '.').strip()
-            p_price = str(p.price).replace(',', '.').strip()
-            
-            if p_discount != "0" and p_discount != "":
-                final_price = float(p_discount)
-            else:
-                final_price = float(p_price)
+    # Nustatome kelius iki tavo JSON failų
+    # Jei app.py yra "Backend" aplanke, o failai "Backend/Crawler/...", kelias bus toks:
+    rimi_path = os.path.join(base_path, "Crawler", "Crawler", "products.json")
+    iki_path = os.path.join(base_path, "Crawler", "Crawler", "IKI_products.json")
 
-            data.append({
-                "name": p.name,
-                "price": final_price,
-                "image": p.image_url,
-                "baltymai": float(str(p.protein).replace(',', '.')),
-                "angliavandeniai": float(str(p.carbohydrates).replace(',', '.')),
-                "riebalai": float(str(p.fat).replace(',', '.')),
-                "calories": float(p.calories_kcal),
-                "store": "Rimi",
-                "storeLogo": "http://127.0.0.1:5000/static/Icons/rimi_logo.png"
-            })
+    print(f"\nDEBUG: Ieškau failo čia -> {rimi_path}")
+    print(f"DEBUG: Ar failas egzistuoja? -> {os.path.exists(rimi_path)}")
+    data = []
+
+    # --- 1. RIMI DUOMENŲ APDOROJIMAS ---
+    if os.path.exists(rimi_path):
+        try:
+            with open(rimi_path, "r", encoding="utf-8") as f:
+                rimi_products = json.load(f)
+                for p in rimi_products:
+                    try:
+                        # Naudojame .get(), kad programa nenulūžtų, jei trūksta lauko
+                        p_discount = str(p.get('price_discount', '0')).replace(',', '.').strip()
+                        p_price = str(p.get('price', '0')).replace(',', '.').strip()
+                        
+                        if p_discount != "0" and p_discount != "":
+                            final_price = float(p_discount)
+                        else:
+                            final_price = float(p_price)
+
+                        data.append({
+                            "name": p.get('name'),
+                            "price": final_price,
+                            "image": p.get('image_url'),
+                            "baltymai": float(str(p.get('protein', '0')).replace(',', '.')),
+                            "angliavandeniai": float(str(p.get('carbohydrates', '0')).replace(',', '.')),
+                            "riebalai": float(str(p.get('fat', '0')).replace(',', '.')),
+                            "calories": float(p.get('calories_kcal', 0)),
+                            "store": "Rimi",
+                            "storeLogo": "http://127.0.0.1:5000/static/Icons/rimi_logo.png"
+                        })
+                    except Exception:
+                        continue
         except Exception as e:
-            continue
-            
-    return jsonify(data)
+            print(f"Klaida skaitant Rimi failą: {e}")
+
+    # --- 2. IKI DUOMENŲ APDOROJIMAS ---
+    if os.path.exists(iki_path):
+        try:
+            with open(iki_path, "r", encoding="utf-8") as f:
+                iki_products = json.load(f)
+                for p in iki_products:
+                    try:
+                        p_discount = str(p.get('price_discount', '0')).replace(',', '.').strip()
+                        p_price = str(p.get('price', '0')).replace(',', '.').strip()
+                        
+                        if p_discount != "0" and p_discount != "":
+                            final_price = float(p_discount)
+                        else:
+                            final_price = float(p_price)
+
+                        data.append({
+                            "name": p.get('name'),
+                            "price": final_price,
+                            "image": p.get('image_url'),
+                            "baltymai": float(str(p.get('protein', '0')).replace(',', '.')),
+                            "angliavandeniai": float(str(p.get('carbohydrates', '0')).replace(',', '.')),
+                            "riebalai": float(str(p.get('fat', '0')).replace(',', '.')),
+                            "calories": float(p.get('calories_kcal', 0)),
+                            "store": "Iki",
+                            "storeLogo": "http://127.0.0.1:5000/static/Icons/iki_logo.png"
+                        })
+                    except Exception:
+                        continue
+        except Exception as e:
+            print(f"Klaida skaitant Iki failą: {e}")
+
+    # Grąžiname visus surinktus duomenis (apribojame nuo 770 iki 810)
+    return jsonify(data[800:830])
 
 @app.route('/api/stores', methods=['GET'])
 def get_stores():
