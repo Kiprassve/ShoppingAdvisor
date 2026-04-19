@@ -193,9 +193,9 @@ function DrawCircle() {
 }
 
 // --- 7. Parduotuvių gavimas iš DB žemėlapyje ---
-const rimiIcon = L.icon({ iconUrl: 'static/Icons/rimi_logo.png', iconSize: [32, 32], iconAnchor: [16, 32] });
-const maximaIcon = L.icon({ iconUrl: 'static/Icons/maxima_logo.png', iconSize: [32, 32], iconAnchor: [16, 32] });
-const ikiIcon = L.icon({ iconUrl: 'static/Icons/iki_logo.png', iconSize: [32, 32], iconAnchor: [16, 32] });
+const rimiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/rimi_logo.png', iconSize: [32, 32], iconAnchor: [16, 32] });
+const maximaIcon = L.icon({ iconUrl: '/Backend/static\\Icons/maxima_logo.png', iconSize: [32, 15], iconAnchor: [16, 32] });
+const ikiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/iki_logo.png', iconSize: [32, 32], iconAnchor: [16, 32] });
 
 async function GetStores() {
     if (!latitude || !longitude) {
@@ -214,14 +214,17 @@ async function GetStores() {
         const stores = await response.json();
         if (Array.isArray(stores)) {
             stores.forEach(store => {
+
                 let icon = null;
                 if (/Maxima.*/i.test(store.name)) icon = maximaIcon;
                 else if (/Rimi.*/i.test(store.name)) icon = rimiIcon;
                 else if (/Iki.*/i.test(store.name)) icon = ikiIcon;
 
+                if(icon !=null){
                 L.marker([store.lat, store.lon], { icon: icon })
                     .addTo(storeMarkersGroup)
                     .bindPopup(`<b>${store.name}</b>`);
+                }
             });
         }
     } catch (error) {
