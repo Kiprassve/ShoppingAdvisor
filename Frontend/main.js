@@ -200,5 +200,5 @@ async function GetStores (){
 
 radiusInput.addEventListener("input",function(){searchRadius=radiusInput.value; DrawCircle();});
 document.addEventListener("DOMContentLoaded",instantiateMap);
-search_button.addEventListener("click", function(){performSearch; GetStores();});
+search_button.addEventListener("click", function(){performSearch(); GetStores();});
 sidebar_close_button.addEventListener("click", closeSidebar);
