@@ -5,75 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
     <title>Price Scraper</title>
-     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
-<div id="map" ></div>
+    <div id="map"></div>
 
-    
-    <!-- Upper Buttons -->
     <div class="upperContainer">
-        <input type="text" id="locationInput" placeholder="Search Address..." name="macro-search" class="custom-btn"/>
-        <button class="custom-btn"><img src="Icons/pin.png">Place Pin</button>
-        <button class="custom-btn" id="search-btn"><img src="Icons/search.png">Search</button>
+        <input type="text" id="locationInput" placeholder="Search Address..." class="custom-btn"/>
+        <button class="custom-btn"><img src="/Backend/static/Icons/pin.png">Place Pin</button>
+        <button class="custom-btn" id="search-btn"><img src="/Backend/static/Icons/search.png">Search</button>
     </div>
 
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <button id="close-btn">×</button>
+            <h2>Search Results</h2>
+            
+            <div class="store-filter-section">
+                <div class="store-list">
+                    <input type="checkbox" id="filter-rimi" class="store-checkbox" value="Rimi" checked>
+                    <label for="filter-rimi" class="store-btn">
+                        <img src="/Backend/static/Icons/rimi_logo.png" class="mini-logo">
+                    </label>
 
-    
-   <div id="sidebar" class="sidebar">
-    <div class="sidebar-header">
-    <button id="close-btn">×</button>
-    <h2>Search Results</h2>
-    <div class="sort-container">
-        <label for="sortOptions"><b>Sort by:</b></label>
-        <select id="sortOptions" class="sort-select">
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
+                    <input type="checkbox" id="filter-maxima" class="store-checkbox" value="Maxima" checked>
+                    <label for="filter-maxima" class="store-btn">
+                        <img src="/Backend/static/Icons/maxima_logo.png" class="mini-logo">
+                    </label>
 
-            <option value="protein-asc">Protein: Low to High</option>
-            <option value="protein-desc">Protein: High to Low</option>
+                    <input type="checkbox" id="filter-iki" class="store-checkbox" value="Iki" checked>
+                    <label for="filter-iki" class="store-btn">
+                        <img src="/Backend/static/Icons/iki_logo.png" class="mini-logo">
+                    </label>
+                </div>
+            </div>
 
-            <option value="carbs-asc">Carbs: Low to High</option>
-            <option value="carbs-desc">Carbs: High to Low</option>
-
-            <option value="fat-asc">Fat: Low to High</option>
-            <option value="fat-desc">Fat: High to High</option>
-
-            <option value="fiber-asc">Fiber: Low to High</option>
-            <option value="fiber-desc">Fiber: High to High</option>
-        </select>
-    </div>
-</div>
-    
-    <div id="resultsList" class="results-container">
+            <div class="sort-container">
+                <select id="sortOptions" class="sort-select">
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="protein-desc">Protein: High to Low</option>
+                </select>
+            </div>
         </div>
-</div>
+        
+        <div id="resultsList" class="results-container"></div>
+        <div id="pagination" class="pagination-container"></div>
+    </div>
 
     <div class="lowerContainer">
-            <div class="nutrients">
-                <div class="title">Select macronutrients:</div>  
-                <div class="list">
+        <div class="nutrients">
+            <div class="title">Select macronutrients:</div>  
+            <div class="list">
                 <input type="checkbox" name="nutrient" id="protein"/>
                 <label for="protein">Protein</label>
-
                 <input type="checkbox" name="nutrient" id="carbohydrates"/>
                 <label for="carbohydrates">Carbohydrates</label>
-
                 <input type="checkbox" name="nutrient" id="fat"/>
                 <label for="fat">Fat</label>
-
                 <input type="checkbox" name="nutrient" id="fiber"/>
                 <label for="fiber">Fiber</label>
             </div>
-    </div>       
+        </div>       
 
-    <div class="controls">
-    <label>Select search readius: <span id="radiusLabel" class="radius-value">5</span> km</label>
-    <input type="range" id="radiusInput" min="0" max="10" value="5">
-</div>
+        <div class="controls">
+            <label>Select search radius: <span id="radiusLabel" class="radius-value">5</span> km</label>
+            <input type="range" id="radiusInput" min="0" max="10" value="5">
+        </div>
+    </div>
 
-        <script src="main.js" defer></script>
+    <script src="main.js" defer></script>
 </body>
 </html>

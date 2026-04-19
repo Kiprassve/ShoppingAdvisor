@@ -503,5 +503,95 @@ font-family: Arial, Helvetica, sans-serif;
     font-family: sans-serif;
 }
 
+/* styles.css */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    gap: 8px;
+    background: white;
+    border-top: 1px solid #ddd;
+}
+
+.pagination-container button {
+    padding: 5px 10px;
+    border: 1px solid #599bcd;
+    background: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.pagination-container button.active {
+    background: #599bcd;
+    color: white;
+}
+
+.pagination-container button:disabled {
+    border-color: #ccc;
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Pridėk šiuos stilius prie savo esamo CSS */
+
+.store-filter-section {
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+.filter-title {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: white; /* Sidebar antraštė tamsi, tad tekstas baltas */
+    margin-bottom: 8px;
+}
+
+.store-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Slepiame checkbox */
+.store-checkbox {
+    display: none;
+}
+
+/* Mygtuko bazinis stilius (kaip tavo .list label) */
+.store-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 15px;
+    border: 2px solid #ffffff; /* Balta spalva ant mėlyno fono */
+    border-radius: 20px;
+    background-color: transparent;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 650;
+    transition: all 0.2s ease;
+}
+
+.mini-logo {
+    height: 16px;
+    width: auto;
+    filter: grayscale(100%) brightness(2); /* Pilkas logotipas neaktyvus */
+}
+
+/* Aktyvi būsena (pažymėta) */
+.store-checkbox:checked + .store-btn {
+    background-color: white;
+    color: rgb(89, 155, 205);
+    border-color: white;
+}
+
+.store-checkbox:checked + .store-btn .mini-logo {
+    filter: grayscale(0%) brightness(1); /* Spalvotas logotipas aktyvus */
+}
+
 .radius-value { font-weight: bold; color: #007bff; }
 input[type=range] { width: 100%; cursor: pointer; }
