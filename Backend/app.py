@@ -15,9 +15,9 @@ def get_data():
     base_path = os.path.dirname(os.path.abspath(__file__))
 
     # Gauname reikšmes iš main.js GetStores funkcijos ar parduotuvė egzistuoja duotam spinduliui
-    exist_maxima = request.args.get('maxima', 'false').lower() == 'true'
-    exist_rimi = request.args.get('rimi', 'false').lower() == 'true'
-    exist_iki = request.args.get('iki', 'false').lower() == 'true'
+    exist_maxima = request.args.get('maxima', 'false').lower()
+    exist_rimi = request.args.get('rimi', 'false').lower()
+    exist_iki = request.args.get('iki', 'false').lower()
     # Nustatome kelius iki tavo JSON failų
     # Jei app.py yra "Backend" aplanke, o failai "Backend/Crawler/...", kelias bus toks:
     rimi_path = os.path.join(base_path, "Crawler", "Crawler", "products.json")
@@ -27,8 +27,8 @@ def get_data():
     print(f"DEBUG: Ar failas egzistuoja? -> {os.path.exists(rimi_path)}")
     data = []
 
-    # --- 1. RIMI DUOMENŲ APDOROJIMAS ---
-    if os.path.exists(rimi_path) and exist_rimi:
+    # --- 1. RIMI DUOMENŲ APDOROJIMAS ---d
+    if os.path.exists(rimi_path) and exist_rimi == 'true':
         try:
             with open(rimi_path, "r", encoding="utf-8") as f:
                 rimi_products = json.load(f)
@@ -60,7 +60,7 @@ def get_data():
             print(f"Klaida skaitant Rimi failą: {e}")
 
     # --- 2. IKI DUOMENŲ APDOROJIMAS ---
-    if os.path.exists(iki_path):
+    if os.path.exists(iki_path) and exist_iki == 'true':
         try:
             with open(iki_path, "r", encoding="utf-8") as f:
                 iki_products = json.load(f)
