@@ -16,6 +16,9 @@ __pycache__/
 
 # Local environment
 .env
+venv/
+.venv/
+env/
 
 # the lithuanian stores database
 Data/map_data.osm.pbf
