@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+    <title>Price Scraper</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <div class="upperContainer">
+        <input type="text" id="locationInput" placeholder="Search Address..." class="custom-btn"/>
+        <button class="custom-btn"><img src="/Backend/static/Icons/pin.png">Place Pin</button>
+        <button class="custom-btn" id="search-btn"><img src="/Backend/static/Icons/search.png">Search</button>
+    </div>
+
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <button id="close-btn">×</button>
+            <h2>Search Results</h2>
+            
+            <div class="store-filter-section">
+                <div class="store-list">
+                    <input type="checkbox" id="filter-rimi" class="store-checkbox" value="Rimi" checked>
+                    <label for="filter-rimi" class="store-btn">
+                        <img src="/static/Icons/rimi_logo.png" class="mini-logo">
+                    </label>
+
+                    <input type="checkbox" id="filter-maxima" class="store-checkbox" value="Maxima" checked>
+                    <label for="filter-maxima" class="store-btn">
+                        <img src="/static/Icons/maxima_logo.png" class="mini-logo">
+                    </label>
+
+                    <input type="checkbox" id="filter-iki" class="store-checkbox" value="Iki" checked>
+                    <label for="filter-iki" class="store-btn">
+                        <img src="/static/Icons/iki_logo.png" class="mini-logo">
+                    </label>
+                </div>
+            </div>
+
+            <div class="sort-container">
+                <select id="sortOptions" class="sort-select">
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="protein-desc">Protein: High to Low</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="resultsList" class="results-container"></div>
+        <div id="pagination" class="pagination-container"></div>
+    </div>
+
+    <div class="lowerContainer">
+        <div class="nutrients">
+            <div class="title">Select macronutrients:</div>  
+            <div class="list">
+                <input type="checkbox" name="nutrient" id="protein"/>
+                <label for="protein">Protein</label>
+                <input type="checkbox" name="nutrient" id="carbohydrates"/>
+                <label for="carbohydrates">Carbohydrates</label>
+                <input type="checkbox" name="nutrient" id="fat"/>
+                <label for="fat">Fat</label>
+                <input type="checkbox" name="nutrient" id="fiber"/>
+                <label for="fiber">Fiber</label>
+            </div>
+        </div>       
+
+        <div class="controls">
+            <label>Select search radius: <span id="radiusLabel" class="radius-value">5</span> km</label>
+            <input type="range" id="radiusInput" min="0" max="10" value="5">
+        </div>
+    </div>
+
+    <script src="/static/main.js" defer></script>
+</body>
+</html>

@@ -95,7 +95,6 @@ def get_data():
 
 @app.route('/api/stores', methods=['GET'])
 def get_stores():
-    # 1. Get coordinates and radius from Leaflet
     lat = request.args.get('lat', type=float)
     lon = request.args.get('lon', type=float)
     radius = request.args.get('radius', type=float)
@@ -105,16 +104,20 @@ def get_stores():
 
     conn = None
     try:
-        
         conn = psycopg2.connect(DB_URL)
         cursor = conn.cursor()
         
-       
+        # Kadangi stulpelių su dvitaškiais nėra, o 'tags' neegzistuoja, 
+        # naudojame tik saugius, standartinius OSM stulpelius.
+        # COALESCE padeda išvengti NULL reikšmių.
         sql = """
             SELECT 
-            name, 
+                name, 
                 ST_Y(ST_Transform(way, 4326)) as lat, 
-                ST_X(ST_Transform(way, 4326)) as lon 
+                ST_X(ST_Transform(way, 4326)) as lon,
+                'Informacija neprieinama' as opening_hours,
+                'Nėra svetainės' as website,
+                COALESCE(name, 'Parduotuvė') as address
             FROM planet_osm_point 
             WHERE shop IS NOT NULL 
             AND ST_DWithin(
@@ -126,7 +129,10 @@ def get_stores():
             SELECT 
                 name, 
                 ST_Y(ST_Transform(ST_Centroid(way), 4326)) as lat, 
-                ST_X(ST_Transform(ST_Centroid(way), 4326)) as lon 
+                ST_X(ST_Transform(ST_Centroid(way), 4326)) as lon,
+                'Informacija neprieinama' as opening_hours,
+                'Nėra svetainės' as website,
+                COALESCE(name, 'Parduotuvė') as address
             FROM planet_osm_polygon 
             WHERE shop IS NOT NULL 
             AND ST_DWithin(
@@ -137,16 +143,17 @@ def get_stores():
         """
         
         cursor.execute(sql, (lon, lat, radius, lon, lat, radius))
- 
         rows = cursor.fetchall()
         
-      
         stores = []
         for row in rows:
             stores.append({
-                "name": row[0] if row[0] else "Unnamed Store",
+                "name": row[0] if row[0] else "Parduotuvė",
                 "lat": row[1],
-                "lon": row[2]
+                "lon": row[2],
+                "opening_hours": row[3],
+                "website": row[4],
+                "address": row[5] # Naudojame pavadinimą kaip adresą, nes kiti laukai DB neegzistuoja
             })
             
         return jsonify(stores)
@@ -154,7 +161,6 @@ def get_stores():
     except Exception as e:
         print("Database error:", e)
         return jsonify({"error": str(e)}), 500
-        
     finally:
         if conn:
             cursor.close()

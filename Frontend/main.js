@@ -205,7 +205,7 @@ async function GetStores() {
         return { maxima: false, rimi: false, iki: false };
     }
 
-    let foundBrands = { maxima: false, rimi: false, iki: false }; // Kintamieji kurie nurodo ar rasta maxima, rimi, iki spindulyje
+    let foundBrands = { maxima: false, rimi: false, iki: false }; 
     storeMarkersGroup.clearLayers();
     const radiusInMeters = searchRadius * 1000;
     const url = `http://localhost:5000/api/stores?lat=${latitude}&lon=${longitude}&radius=${radiusInMeters}`;
@@ -217,28 +217,40 @@ async function GetStores() {
         const stores = await response.json();
         if (Array.isArray(stores)) {
             stores.forEach(store => {
-
                 let icon = null;
-                if (/Maxima.*/i.test(store.name))
-                    { 
-                        icon = maximaIcon;
-                        foundBrands.maxima = true;
-                    }
-                else if (/Rimi.*/i.test(store.name)) 
-                    {
-                        icon = rimiIcon;
-                        foundBrands.rimi = true;
-                    }
-                else if (/Iki.*/i.test(store.name)) 
-                    {
-                        icon = ikiIcon;
-                        foundBrands.iki = true;
-                    }
+                let webUrl = "";
+                let nameLower = (store.name || "").toLowerCase();
 
-                if(icon !=null){
-                L.marker([store.lat, store.lon], { icon: icon })
-                    .addTo(storeMarkersGroup)
-                    .bindPopup(`<b>${store.name}</b>`);
+                // Filtruojame tik 3 tinklus ir priskiriame nuorodas
+                if (nameLower.includes("maxima")) { 
+                    icon = maximaIcon;
+                    webUrl = "https://www.maxima.lt";
+                    foundBrands.maxima = true;
+                } else if (nameLower.includes("rimi")) {
+                    icon = rimiIcon;
+                    webUrl = "https://www.rimi.lt";
+                    foundBrands.rimi = true;
+                } else if (nameLower.includes("iki")) {
+                    icon = ikiIcon;
+                    webUrl = "https://www.iki.lt";
+                    foundBrands.iki = true;
+                }
+
+                // Jei tai viena iš trijų parduotuvių, dedame žymeklį
+                if (icon != null) {
+                    const popupContent = `
+                        <div class="store-popup" style="min-width: 150px;">
+                            <h3 style="margin-bottom: 8px;">${store.name}</h3>
+                            <a href="${webUrl}" target="_blank" 
+                               style="display: inline-block; color: #007bff; text-decoration: none; font-weight: bold; font-size: 13px;">
+                               🌐 Apsilankyti svetainėje &rarr;
+                            </a>
+                        </div>
+                    `;
+
+                    L.marker([store.lat, store.lon], { icon: icon })
+                        .addTo(storeMarkersGroup)
+                        .bindPopup(popupContent);
                 }
             });
         }
