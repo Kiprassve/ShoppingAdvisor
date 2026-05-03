@@ -11,15 +11,16 @@ let currentPage = 1;       // Dabartinis puslapis
 const itemsPerPage = 5;   // Kiek produktų rodyti viename puslapyje
 
 // --- 1. Pagrindinė paieškos funkcija ---
-async function performSearch() {
+async function performSearch(brands = { maxima: true, rimi: true, iki: true }) {
     list.innerHTML = '<p style="padding:20px;">Searching products in Rimi... (this may take a minute)</p>';
     sidebar.classList.add('open');
     currentPage = 1; // Grįžtame į pirmą puslapį naujai paieškai
 
     try {
         // Kreipiamės į Flask serverį skreipinimui
-        const response = await fetch('http://127.0.0.1:5000/api/scrape');
-        
+        //klaustukas (?) po scrape rodo kad parametrai neprivalomi
+        const url = `http://127.0.0.1:5000/api/scrape?maxima=${brands.maxima}&rimi=${brands.rimi}&iki=${brands.iki}`;
+        const response = await fetch(url);
         if (!response.ok) throw new Error("Serverio klaida");
         
         const realData = await response.json();
@@ -197,12 +198,14 @@ const rimiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/rimi_logo.png', iconS
 const maximaIcon = L.icon({ iconUrl: '/Backend/static\\Icons/maxima_logo.png', iconSize: [32, 15], iconAnchor: [16, 32] });
 const ikiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/iki_logo.png', iconSize: [32, 32], iconAnchor: [16, 32] });
 
+
 async function GetStores() {
     if (!latitude || !longitude) {
         console.warn("Nenustatyta vieta žemėlapyje (dukart spustelėkite).");
-        return;
+        return { maxima: false, rimi: false, iki: false };
     }
 
+    let foundBrands = { maxima: false, rimi: false, iki: false }; // Kintamieji kurie nurodo ar rasta maxima, rimi, iki spindulyje
     storeMarkersGroup.clearLayers();
     const radiusInMeters = searchRadius * 1000;
     const url = `http://localhost:5000/api/stores?lat=${latitude}&lon=${longitude}&radius=${radiusInMeters}`;
@@ -216,9 +219,21 @@ async function GetStores() {
             stores.forEach(store => {
 
                 let icon = null;
-                if (/Maxima.*/i.test(store.name)) icon = maximaIcon;
-                else if (/Rimi.*/i.test(store.name)) icon = rimiIcon;
-                else if (/Iki.*/i.test(store.name)) icon = ikiIcon;
+                if (/Maxima.*/i.test(store.name))
+                    { 
+                        icon = maximaIcon;
+                        foundBrands.maxima = true;
+                    }
+                else if (/Rimi.*/i.test(store.name)) 
+                    {
+                        icon = rimiIcon;
+                        foundBrands.rimi = true;
+                    }
+                else if (/Iki.*/i.test(store.name)) 
+                    {
+                        icon = ikiIcon;
+                        foundBrands.iki = true;
+                    }
 
                 if(icon !=null){
                 L.marker([store.lat, store.lon], { icon: icon })
@@ -230,7 +245,9 @@ async function GetStores() {
     } catch (error) {
         console.error("Map error:", error);
     }
+    return foundBrands;
 }
+//app.py metodo iskvetimas get_data(iki,rimi,maxima)
 
 // --- 8. Event Listeners ---
 
@@ -247,9 +264,10 @@ radiusInput.addEventListener("input", function() {
 });
 
 // Pagrindinis paieškos mygtukas
-search_button.addEventListener("click", function() {
-    performSearch(); // Skreipinam prekes
-    GetStores();     // Ieškom parduotuvių aplink
+search_button.addEventListener("click", async function() {
+    const foundBrands = await GetStores(); // Ieškom parduotuvių aplink
+    performSearch(foundBrands); // Skreipinam prekes
+    
 });
 
 // Sidebar uždarymas

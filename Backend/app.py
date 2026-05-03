@@ -13,7 +13,11 @@ DB_URL = os.environ.get("DATABASE_URL","postgresql://postgres:password123@db:543
 @app.route('/api/scrape', methods=['GET'])
 def get_data():
     base_path = os.path.dirname(os.path.abspath(__file__))
-    
+
+    # Gauname reikšmes iš main.js GetStores funkcijos ar parduotuvė egzistuoja duotam spinduliui
+    exist_maxima = request.args.get('maxima', 'false').lower() == 'true'
+    exist_rimi = request.args.get('rimi', 'false').lower() == 'true'
+    exist_iki = request.args.get('iki', 'false').lower() == 'true'
     # Nustatome kelius iki tavo JSON failų
     # Jei app.py yra "Backend" aplanke, o failai "Backend/Crawler/...", kelias bus toks:
     rimi_path = os.path.join(base_path, "Crawler", "Crawler", "products.json")
@@ -24,7 +28,7 @@ def get_data():
     data = []
 
     # --- 1. RIMI DUOMENŲ APDOROJIMAS ---
-    if os.path.exists(rimi_path):
+    if os.path.exists(rimi_path) and exist_rimi:
         try:
             with open(rimi_path, "r", encoding="utf-8") as f:
                 rimi_products = json.load(f)
