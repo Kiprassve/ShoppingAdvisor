@@ -56,17 +56,38 @@
     </div>
 
     <div class="lowerContainer">
+
+            <div class="title">Select priorities:</div>  
+        <div class="Preference">
+
+            <input type="checkbox" id="priceMassOne" name="priceMassOne"/> 
+            <label for="priceMassOne">Price</label>
+            <input type="checkbox" id="ascdescone" name="ascdescone"/> 
+            <label for="ascdescone">Ascending</label>
+            <input type="text" id="firstItem" readonly> 
+            <input type="range" id="Favour" min="0" max="10" value="5"> 
+            <input type="text" id="secondItem" readonly> 
+            <input type="checkbox" id="priceMassTwo" name="priceMassTwo"/> 
+            <label for="priceMassTwo">Price</label>
+            <input type="checkbox" id="ascdesctwo" name="ascdesctwo"/> 
+            <label for="ascdesctwo">Ascending</label>
+        </div>
         <div class="nutrients">
             <div class="title">Select macronutrients:</div>  
             <div class="list">
                 <input type="checkbox" name="nutrient" id="protein"/>
                 <label for="protein">Protein</label>
-                <input type="checkbox" name="nutrient" id="carbohydrates"/>
-                <label for="carbohydrates">Carbohydrates</label>
+                <input type="checkbox" name="nutrient" id="carbs"/>
+                <label for="carbs">Carbs</label>
+               <!-- <input type="checkbox" name="nutrient" id="sugar"/>
+                <label for="sugar">Sugar</label>-->
                 <input type="checkbox" name="nutrient" id="fat"/>
                 <label for="fat">Fat</label>
-                <input type="checkbox" name="nutrient" id="fiber"/>
-                <label for="fiber">Fiber</label>
+               <!-- <input type="checkbox" name="nutrient" id="fiber"/>
+                <label for="fiber">Fiber</label>-->
+                <input type="checkbox" name="nutrient" id="calories"/>
+                <label for="calories">Calories</label>
+                
             </div>
         </div>       
 
