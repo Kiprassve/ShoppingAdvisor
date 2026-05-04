@@ -12,86 +12,58 @@ DB_URL = os.environ.get("DATABASE_URL","postgresql://postgres:password123@db:543
 
 @app.route('/api/scrape', methods=['GET'])
 def get_data():
-    base_path = os.path.dirname(os.path.abspath(__file__))
-
-    # Gauname reikšmes iš main.js GetStores funkcijos ar parduotuvė egzistuoja duotam spinduliui
-    exist_maxima = request.args.get('maxima', 'false').lower()
+    # Gauname filtrus iš užklausos (pvz., ?rimi=true&iki=true)
     exist_rimi = request.args.get('rimi', 'false').lower()
     exist_iki = request.args.get('iki', 'false').lower()
-    # Nustatome kelius iki tavo JSON failų
-    # Jei app.py yra "Backend" aplanke, o failai "Backend/Crawler/...", kelias bus toks:
-    rimi_path = os.path.join(base_path, "Crawler", "Crawler", "products.json")
-    iki_path = os.path.join(base_path, "Crawler", "Crawler", "IKI_products.json")
+    
+    stores_to_fetch = []
+    if exist_rimi == 'true': stores_to_fetch.append('Rimi')
+    if exist_iki == 'true': stores_to_fetch.append('Iki')
 
-    print(f"\nDEBUG: Ieškau failo čia -> {rimi_path}")
-    print(f"DEBUG: Ar failas egzistuoja? -> {os.path.exists(rimi_path)}")
-    data = []
+    if not stores_to_fetch:
+        return jsonify([])
 
-    # --- 1. RIMI DUOMENŲ APDOROJIMAS ---d
-    if os.path.exists(rimi_path) and exist_rimi == 'true':
-        try:
-            with open(rimi_path, "r", encoding="utf-8") as f:
-                rimi_products = json.load(f)
-                for p in rimi_products:
-                    try:
-                        # Naudojame .get(), kad programa nenulūžtų, jei trūksta lauko
-                        p_discount = str(p.get('price_discount', '0')).replace(',', '.').strip()
-                        p_price = str(p.get('price', '0')).replace(',', '.').strip()
-                        
-                        if p_discount != "0" and p_discount != "":
-                            final_price = float(p_discount)
-                        else:
-                            final_price = float(p_price)
-
-                        data.append({
-                            "name": p.get('name'),
-                            "price": final_price,
-                            "image": p.get('image_url'),
-                            "baltymai": float(str(p.get('protein', '0')).replace(',', '.')),
-                            "angliavandeniai": float(str(p.get('carbohydrates', '0')).replace(',', '.')),
-                            "riebalai": float(str(p.get('fat', '0')).replace(',', '.')),
-                            "calories": float(p.get('calories_kcal', 0)),
-                            "store": "Rimi",
-                            "storeLogo": "http://127.0.0.1:5000/static/Icons/rimi_logo.png"
-                        })
-                    except Exception:
-                        continue
-        except Exception as e:
-            print(f"Klaida skaitant Rimi failą: {e}")
-
-    # --- 2. IKI DUOMENŲ APDOROJIMAS ---
-    if os.path.exists(iki_path) and exist_iki == 'true':
-        try:
-            with open(iki_path, "r", encoding="utf-8") as f:
-                iki_products = json.load(f)
-                for p in iki_products:
-                    try:
-                        p_discount = str(p.get('price_discount', '0')).replace(',', '.').strip()
-                        p_price = str(p.get('price', '0')).replace(',', '.').strip()
-                        
-                        if p_discount != "0" and p_discount != "":
-                            final_price = float(p_discount)
-                        else:
-                            final_price = float(p_price)
-
-                        data.append({
-                            "name": p.get('name'),
-                            "price": final_price,
-                            "image": p.get('image_url'),
-                            "baltymai": float(str(p.get('protein', '0')).replace(',', '.')),
-                            "angliavandeniai": float(str(p.get('carbohydrates', '0')).replace(',', '.')),
-                            "riebalai": float(str(p.get('fat', '0')).replace(',', '.')),
-                            "calories": float(p.get('calories_kcal', 0)),
-                            "store": "Iki",
-                            "storeLogo": "http://127.0.0.1:5000/static/Icons/iki_logo.png"
-                        })
-                    except Exception:
-                        continue
-        except Exception as e:
-            print(f"Klaida skaitant Iki failą: {e}")
-
-    # Grąžiname visus surinktus duomenis (apribojame nuo 800 iki 830)
-    return jsonify(data[800:830])
+    conn = None
+    try:
+        conn = psycopg2.connect(DB_URL)
+        cursor = conn.cursor()
+        
+        # Naudojame IN operatorių, kad paimtume duomenis tik iš pasirinktų parduotuvių
+        # Taip pat surūšiuojame pagal sukūrimo laiką, kad matytume naujausius skreipinimo rezultatus
+        query = """
+            SELECT name, price, image_url, protein, carbohydrates, fat, calories, store_name 
+            FROM products 
+            WHERE store_name = ANY(%s)
+            ORDER BY id DESC
+            LIMIT 100;
+        """
+        
+        cursor.execute(query, (stores_to_fetch,))
+        rows = cursor.fetchall()
+        
+        data = []
+        for row in rows:
+            data.append({
+                "name": row[0],
+                "price": float(row[1]),
+                "image": row[2],
+                "baltymai": float(row[3] or 0),
+                "angliavandeniai": float(row[4] or 0),
+                "riebalai": float(row[5] or 0),
+                "calories": float(row[6] or 0),
+                "store": row[7],
+                "storeLogo": f"[http://127.0.0.1:5000/static/Icons/](http://127.0.0.1:5000/static/Icons/){row[7].lower()}_logo.png"
+            })
+            
+        return jsonify(data)
+    
+    except Exception as e:
+        print(f"Klaida imant duomenis iš DB: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
 
 @app.route('/api/stores', methods=['GET'])
 def get_stores():
