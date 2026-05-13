@@ -52,7 +52,7 @@ def get_data():
                 "riebalai": float(row[5] or 0),
                 "calories": float(row[6] or 0),
                 "store": row[7],
-                "storeLogo": f"[http://127.0.0.1:5000/static/Icons/](http://127.0.0.1:5000/static/Icons/){row[7].lower()}_logo.png"
+                "storeLogo": f"http://127.0.0.1:5000/static/Icons/{row[7].lower()}_logo.png"
             })
             
         return jsonify(data)

@@ -84,7 +84,6 @@ function updateUI() {
 // --- 2. Rūšiavimo logika ---
 function sortProducts(data) { 
 
-        console.log(selectedMacros[0].id + " "+selectedMacros[1].id);
      const n = data.length;
   for (let i = 0; i < n - 1; i++) {
     for (let j = 0; j < n - i - 1; j++) {
@@ -93,7 +92,10 @@ let curFirstMacro = getMacro(data,0,j,oneSortPrice);
 let curSecondMacro = getMacro(data,1,j,twoSortPrice);
 let nextFirstMacro = getMacro(data,0,j+1,oneSortPrice);
 let nextSecondMacro = getMacro(data,1,j+1,twoSortPrice);
-
+if(curFirstMacro==0)
+    {
+return data;
+    }
 let a = oneSortAscending? 1:-1;
 let b = twoSortAscending? 1:-1;
 
@@ -110,6 +112,7 @@ let second = (nextFirstMacro * preferenceWeight * a) + (nextSecondMacro * (10-pr
 function getMacro(data, i ,j,byPrice){
 
         let Macro;   
+        if(selectedMacros[i]==null){return 0;}
         switch(selectedMacros[i].id){
             case "protein":
             Macro = data[j].baltymai;
@@ -128,6 +131,8 @@ function getMacro(data, i ,j,byPrice){
         }
        if(byPrice)
         {Macro/=data[j].price} 
+        
+        
         return Macro;
 }
 
