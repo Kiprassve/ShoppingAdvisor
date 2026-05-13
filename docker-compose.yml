@@ -37,6 +37,7 @@ services:
     ports:
       - "5000:5000"
     environment:
+      - PYTHONUNBUFFERED=1
       - DATABASE_URL=postgresql://postgres:password123@db:5432/map_demo
       - PYTHONPATH=/app:/app/Crawler:/app/Crawler/Crawler
     depends_on:
@@ -49,3 +50,16 @@ services:
       - "8080:80"
     volumes:
       - ./frontend:/usr/share/nginx/html
+
+  crawler:
+    build: 
+      context: ./Backend
+      dockerfile: Dockerfile
+    command: python Crawler/Crawler/Crawler.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://postgres:password123@db:5432/map_demo
+      - PYTHONPATH=/app:/app/Crawler
+    depends_on:
+      - db
+    restart: always

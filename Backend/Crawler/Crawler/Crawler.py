@@ -211,7 +211,7 @@ def Rimi_crawler(url):
             url=None
             
     return All_Products
-if __name__ == "__main__":
+""" if __name__ == "__main__":
     # 1. Gauname aplanką, kuriame yra šis Crawler.py failas
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -224,7 +224,7 @@ if __name__ == "__main__":
         break
     data_to_json=[product.__dict__ for product in All_Products]
     with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(data_to_json, f, ensure_ascii=False, indent=4)
+        json.dump(data_to_json, f, ensure_ascii=False, indent=4) """
 
 
 #---TESTAS-----
@@ -510,7 +510,7 @@ def IKI_crawler(url):
         fromIndex=fromIndex+limit
 
 
-""" if __name__ == "__main__":
+if __name__ == "__main__":
     # 1. Gauname aplanką, kuriame yra šis Crawler.py failas
     current_dir = os.path.dirname(os.path.abspath(__file__))
     # 2. Sujungiame tą aplanką su failo pavadinimu
@@ -522,4 +522,5 @@ def IKI_crawler(url):
     if All_Products2:
         data_to_json2=[product.__dict__ for product in All_Products2]
         with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(data_to_json2, f, ensure_ascii=False, indent=4) """
+            json.dump(data_to_json2, f, ensure_ascii=False, indent=4)
+            
