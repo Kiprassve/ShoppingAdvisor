@@ -97,13 +97,9 @@ let nextSecondMacro = getMacro(data,1,j+1,twoSortPrice);
 let a = oneSortAscending? 1:-1;
 let b = twoSortAscending? 1:-1;
 
-console.log(curFirstMacro +" * "+preferenceWeight+" * "+a+" )+( "+ curSecondMacro+" *"+(10-preferenceWeight)+" * "+b);
 let first = (curFirstMacro * preferenceWeight * a) + (curSecondMacro * (10-preferenceWeight) * b);
-console.log(nextFirstMacro +" * "+preferenceWeight+" * "+a+" )+( "+ nextSecondMacro+" *"+(10-preferenceWeight)+" * "+b);
 let second = (nextFirstMacro * preferenceWeight * a) + (nextSecondMacro * (10-preferenceWeight) * b);
-console.log(first +" "+ second);
       if (first > second) {
-        console.log("work");
         [data[j], data[j + 1]] = [data[j + 1], data[j]];
       }
     }
@@ -387,7 +383,6 @@ let oneSortAscending = true;
 sort_Method_One.addEventListener('change', function () {
     oneSortAscending = !oneSortAscending;
     document.querySelector("label[for='ascdescone']").textContent = oneSortAscending ? "Ascending" : "Descending";
-    updateDisplays();
 });
 let twoSortPrice =true;
 sort_Option_Two.addEventListener('change', function () {
