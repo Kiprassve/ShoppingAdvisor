@@ -1,0 +1,7 @@
+rules:
+  - id: check-flask-import
+    patterns:
+      - pattern: from flask import Flask
+    message: "Flask import detected (This is a test rule)"
+    languages: [python]
+    severity: INFO

@@ -49,13 +49,14 @@ button img
 }
 
 input[type="checkbox"] {
-    width: 20px;
+    width: 200px;
     height: 20px;
     cursor: pointer;
 }
 
 /* ----- */
 .lowerContainer {
+
     /* 1. Positioning */
     position: fixed;   /* Keeps it locked to the screen, even if you scroll */
     bottom: 0;         /* Pins it to the very bottom */
@@ -81,6 +82,7 @@ input[type="checkbox"] {
     pointer-events: auto; 
 }
 
+
 .title
 {
     width: 100%;
@@ -91,28 +93,6 @@ input[type="checkbox"] {
     padding-bottom: 20px;
 }
 
-.list label
-{
-    padding: 8px 25px;
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: 600;
-    font-size: 20px;
-    border: 0.6mm solid black;
-    border-radius: 20px;
-    margin: 5px;
-    cursor: pointer;
-}
-
-.list input
-{
-    display: none;
-}
-.list input:checked + label
-{
-    color: rgb(0, 120, 230);
-    border-color: rgb(15, 150, 255);
-    background: rgb(230,245,255);
-}
 
 
 /* SIDEBAR */
@@ -176,11 +156,8 @@ button img
     padding: 0px 5px 0px 0px;
     margin: 5px 5px 5px 0px;
 }
-
-input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
+.list input[type="checkbox"] {
+    display: none; 
 }
 
 /* ----- */
@@ -205,8 +182,15 @@ input[type="checkbox"] {
     padding-bottom: 20px;
 }
 
-.list label
+
+.list input
 {
+    display: none;
+}
+.list label,
+.Preference label
+{
+    background-color: #ffffff;
     padding: 8px 25px;
     font-family: Arial, Helvetica, sans-serif;
     font-weight: 600;
@@ -216,20 +200,16 @@ input[type="checkbox"] {
     margin: 5px;
     cursor: pointer;
 }
-
-.list input
-{
-    display: none;
+.list input[type="checkbox"]:checked + label {
+    background: linear-gradient(to top,#8fc1f7,#3166f8);
+    color: white;              /* White text */
+    border-color: #007bff;
 }
-.list input:checked + label
-{
-    color: rgb(0, 120, 230);
-    border-color: rgb(15, 150, 255);
-    background: rgb(230,245,255);
+.Preference input[type="checkbox"]{
+display: none;
 }
 
 
-/* SIDEBAR */
 
 .sidebar {
      position: absolute; z-index: 10;
@@ -592,6 +572,34 @@ font-family: Arial, Helvetica, sans-serif;
 .store-checkbox:checked + .store-btn .mini-logo {
     filter: grayscale(0%) brightness(1); /* Spalvotas logotipas aktyvus */
 }
+
+.Preference {
+    display: flex;
+    align-items: center;   /* vertically align */
+    gap: 10px;             /* space between items */
+    width: 500px;
+}
+
+.Preference input[type="text"] {
+    width: 85px ;
+
+    padding: 8px 25px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    border: 0.6mm solid black;
+    border-radius: 20px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+
+
+.Preference
+{
+    width: 1200px;
+}
+
 
 .radius-value { font-weight: bold; color: #007bff; }
 input[type=range] { width: 100%; cursor: pointer; }

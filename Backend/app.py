@@ -22,6 +22,51 @@ def get_data():
 
     if not stores_to_fetch:
         return jsonify([])
+<<<<<<< HEAD
+=======
+
+    conn = None
+    try:
+        conn = psycopg2.connect(DB_URL)
+        cursor = conn.cursor()
+        
+        # Naudojame IN operatorių, kad paimtume duomenis tik iš pasirinktų parduotuvių
+        # Taip pat surūšiuojame pagal sukūrimo laiką, kad matytume naujausius skreipinimo rezultatus
+        query = """
+            SELECT name, price, image_url, protein, carbohydrates, fat, calories, store_name 
+            FROM products 
+            WHERE store_name = ANY(%s)
+            ORDER BY id DESC
+            LIMIT 100;
+        """
+        
+        cursor.execute(query, (stores_to_fetch,))
+        rows = cursor.fetchall()
+        
+        data = []
+        for row in rows:
+            data.append({
+                "name": row[0],
+                "price": float(row[1]),
+                "image": row[2],
+                "baltymai": float(row[3] or 0),
+                "angliavandeniai": float(row[4] or 0),
+                "riebalai": float(row[5] or 0),
+                "calories": float(row[6] or 0),
+                "store": row[7],
+                "storeLogo": f"[http://127.0.0.1:5000/static/Icons/](http://127.0.0.1:5000/static/Icons/){row[7].lower()}_logo.png"
+            })
+            
+        return jsonify(data)
+    
+    except Exception as e:
+        print(f"Klaida imant duomenis iš DB: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
+>>>>>>> b8b776b985a327ea66f885b3536e8e3818c90f4e
 
     conn = None
     try:
@@ -289,7 +334,10 @@ def get_stores():
     except Exception as e:
         print("Database error:", e)
         return jsonify({"error": str(e)}), 500
+<<<<<<< HEAD
  
+=======
+>>>>>>> b8b776b985a327ea66f885b3536e8e3818c90f4e
     finally:
         if conn:
             cursor.close()

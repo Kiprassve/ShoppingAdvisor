@@ -1,0 +1,608 @@
+
+
+.upperContainer {
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    height: fit-content; 
+    width: fit-content;
+    margin-bottom: 20px;
+}
+#map {
+    position: absolute; z-index: 1;
+    height: 100vh;
+    width: 100%;
+}
+
+.custom-btn
+{
+    box-sizing: border-box;
+    width: 250px;
+    height: 40px;
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+
+    padding: 5px 25px;
+    border-radius: 20px;
+    border: 2px solid #4b4b4b;
+    background-color: white;
+    cursor: pointer;
+
+
+    font-size: 17px;
+    font-weight: 650;
+}
+
+
+
+button img
+{
+    width: 20px;
+    height: auto;
+
+    padding: 0px 5px 0px 0px;
+    margin: 5px 5px 5px 0px;
+}
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* ----- */
+.lowerContainer {
+    /* 1. Positioning */
+    position: fixed;   /* Keeps it locked to the screen, even if you scroll */
+    bottom: 0;         /* Pins it to the very bottom */
+    left: 0;           /* Pins it to the left edge */
+    width: 100%;       /* Spans the full width to allow centering */
+    z-index: 10;       /* Sits above the map */
+
+    /* 2. Layout (Centering) */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers your content (nutrients list) horizontally */
+    
+    /* 3. Spacing */
+    padding-bottom: 20px;
+    box-sizing: border-box;
+
+    /* 4. Click-Through Logic (Crucial for Map Apps) */
+    pointer-events: none; /* Allows user to click "through" the empty space to the map */
+}
+
+/* 5. Ensure the content INSIDE is clickable */
+.lowerContainer > * {
+    pointer-events: auto; 
+}
+
+.title
+{
+    width: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.list label
+{
+    padding: 8px 25px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    border: 0.6mm solid black;
+    border-radius: 20px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.list input
+{
+    display: none;
+}
+.list input:checked + label
+{
+    color: rgb(0, 120, 230);
+    border-color: rgb(15, 150, 255);
+    background: rgb(230,245,255);
+}
+
+
+/* SIDEBAR */
+html, body {
+    background: none ;
+    background-color: transparent;
+}
+body {
+      background: none ;
+    background-color: transparent ;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    /*padding: 20px;*/
+    box-sizing: border-box;
+    /*background-image: url("TestingImages/BG.png");*/
+    /*background-size: 110%;*/
+}
+
+.upperContainer {
+     position: absolute; z-index: 10;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    height: fit-content; 
+    width: fit-content;
+  
+}
+
+.custom-btn
+{
+    box-sizing: border-box;
+    width: 250px;
+    height: 40px;
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+
+    padding: 5px 25px;
+    border-radius: 20px;
+    border: 2px solid #4b4b4b;
+    background-color: white;
+    cursor: pointer;
+
+
+    font-size: 17px;
+    font-weight: 650;
+}
+
+
+
+button img
+{
+    width: 20px;
+    height: auto;
+
+    padding: 0px 5px 0px 0px;
+    margin: 5px 5px 5px 0px;
+}
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* ----- */
+.lowerContainer
+{
+    margin-top: auto; 
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 20px;
+}
+
+.title
+{
+    width: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.list label
+{
+    padding: 8px 25px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    border: 0.6mm solid black;
+    border-radius: 20px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.list input
+{
+    display: none;
+}
+.list input:checked + label
+{
+    color: rgb(0, 120, 230);
+    border-color: rgb(15, 150, 255);
+    background: rgb(230,245,255);
+}
+
+
+/* SIDEBAR */
+
+.sidebar {
+     position: absolute; z-index: 10;
+
+  height: 100%;
+  width: 425px;
+  position: fixed;
+  top: 0;
+  right: -500px;
+  background-color: #ffffff;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  
+  /* Naudojame flex, kad elementai išsidėstytų stulpeliu */
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  background-color: rgb(89, 155, 205);
+  
+  
+
+  /* Antraštė nesislankios */
+}
+
+.sidebar-header h2{
+font-family: Arial, Helvetica, sans-serif;
+    font-size: 25px;
+    text-align: center;
+    color: rgb(255, 255, 255);
+}
+
+.results-container {
+  flex-grow: 1;      /* Užpildo visą likusią vietą */
+  overflow-y: auto;  /* Įjungia vertikalų slinkimą */
+  padding: 10px;
+}
+
+#resultsList
+{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.sidebar.open {
+  right: 0;
+}
+
+.sidebar.close
+{
+    right: -425px;
+}
+
+
+/* Found items */
+
+.food-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    margin: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative; /* Pridėk šią eilutę! */
+}
+
+.food-card h3 { margin: 0 0 8px 0; font-size: 1.1em; }
+.price { color: #2e7d32; font-weight: bold; }
+
+.food-img {
+  width: 40%;
+  height: 40%;
+  object-fit: cover; /* Keeps image proportional */
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 10px;
+}
+
+.card-content {
+  padding: 0 5px;
+}
+
+.nutritional-info {
+  font-size: 0.85rem;
+  background-color: #f4f4f4;
+  padding: 8px;
+  margin-top: 10px;
+  border-radius: 5px;
+  color: #333;
+}
+
+#close-btn
+{
+    box-sizing: border-box;
+    width: 40px;
+    height: 40px;
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+
+    border-radius: 5px;
+    border: 2px solid #4b4b4b;
+    background-color: white;
+    cursor: pointer;
+
+
+    font-size: 17px;
+    font-weight: 650;
+}
+
+#resultsList
+{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.sidebar.open {
+  right: 0;
+}
+
+.sidebar.close
+{
+    right: -425px;
+}
+
+
+/* Found items */
+
+.food-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    margin: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.food-card h3 { margin: 0 0 8px 0; font-size: 1.1em; }
+.price { color: #2e7d32; font-weight: bold; }
+
+.food-img {
+  width: 40%;
+  height: 40%;
+  object-fit: cover; /* Keeps image proportional */
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 10px;
+}
+
+.card-content {
+  padding: 0 5px;
+}
+
+.nutritional-info {
+  font-size: 0.85rem;
+  background-color: #f4f4f4;
+  padding: 8px;
+  margin-top: 10px;
+  border-radius: 5px;
+  color: #333;
+}
+
+#close-btn
+{
+    box-sizing: border-box;
+    width: 40px;
+    height: 40px;
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+
+    border-radius: 5px;
+    border: 2px solid #4b4b4b;
+    background-color: white;
+    cursor: pointer;
+
+
+    font-size: 17px;
+    font-weight: 650;
+}
+
+.sort-container {
+    padding: 10px;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: Arial, sans-serif;
+    border-radius: 10px;
+}
+
+.sort-select {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.store-badge {
+    position: absolute; /* Leidžia tiksliai pozicionuoti elementą */
+    top: 10px;          /* Atstumas nuo viršaus */
+    right: 10px;        /* Atstumas nuo dešinės */
+    height: 50px;       /* Nustatome fiksuotą aukštį (gali pakoreguoti pagal poreikį) */
+
+    max-width: 120px;   /* Neleidžia Maxima logotipui užimti pusės kortelės */
+    max-height: 50px;
+
+    width: auto;        /* Plotis prisitaiko proporcingai */
+    object-fit: contain;
+    /* background-color: rgba(255, 255, 255, 0.8); /* Šiek tiek skaidrus baltas fonas užtikrina matomumą ant bet kokio paveikslėlio */
+    padding: 5px;       /* Pridedame šiek tiek erdvės aplink logotipą */
+    border-radius: 5px; /* Suapvaliname kampus */
+    z-index: 10;         /* Užtikrina, kad logotipas būtų virš prekės paveikslėlio */
+}
+
+.store-info {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+}
+
+/* Konteineris visiems ženkliukams */
+.nutr-container {
+    display: flex;
+    gap: 6px;           /* Tarpas tarp ženkliukų */
+    margin-top: 12px;
+    width: 100%;
+}
+
+/* Bendras ženkliuko stilius */
+.nutr-badge {
+    flex: 1;            /* Visi ženkliukai užima vienodą plotą */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 2px;
+    border-radius: 8px;
+    background-color: #f8f9fa; /* Labai šviesiai pilka */
+    border: 1px solid #eee;
+}
+
+/* Pavadinimas (PROT, CARB...) */
+.nutr-label {
+    font-size: 10px;
+    font-weight: bold;
+    color: #888;
+    margin-bottom: 2px;
+}
+
+/* Skaičius (6g, 50g...) */
+.nutr-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+}
+
+.controls
+{
+
+    padding-top: 50px;
+    border-radius: 8px;
+    font-family: sans-serif;
+}
+
+/* styles.css */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    gap: 8px;
+    background: white;
+    border-top: 1px solid #ddd;
+}
+
+.pagination-container button {
+    padding: 5px 10px;
+    border: 1px solid #599bcd;
+    background: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.pagination-container button.active {
+    background: #599bcd;
+    color: white;
+}
+
+.pagination-container button:disabled {
+    border-color: #ccc;
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Pridėk šiuos stilius prie savo esamo CSS */
+
+.store-filter-section {
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+.filter-title {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: white; /* Sidebar antraštė tamsi, tad tekstas baltas */
+    margin-bottom: 8px;
+}
+
+.store-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Slepiame checkbox */
+.store-checkbox {
+    display: none;
+}
+
+/* Mygtuko bazinis stilius (kaip tavo .list label) */
+.store-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 15px;
+    border: 2px solid #ffffff; /* Balta spalva ant mėlyno fono */
+    border-radius: 20px;
+    background-color: transparent;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 650;
+    transition: all 0.2s ease;
+}
+
+.mini-logo {
+    height: 16px;
+    width: auto;
+    filter: grayscale(100%) brightness(2); /* Pilkas logotipas neaktyvus */
+}
+
+/* Aktyvi būsena (pažymėta) */
+.store-checkbox:checked + .store-btn {
+    background-color: white;
+    color: rgb(89, 155, 205);
+    border-color: white;
+}
+
+.store-checkbox:checked + .store-btn .mini-logo {
+    filter: grayscale(0%) brightness(1); /* Spalvotas logotipas aktyvus */
+}
+
+.store-popup {
+    font-family: Arial, sans-serif;
+    line-height: 1.4;
+    min-width: 150px;
+}
+.store-popup h3 {
+    color: #599bcd;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.radius-value { font-weight: bold; color: #007bff; }
+input[type=range] { width: 100%; cursor: pointer; }

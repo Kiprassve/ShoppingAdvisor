@@ -5,6 +5,17 @@ const sidebar = document.getElementById('sidebar');
 const list = document.getElementById('resultsList');
 const sortSelect = document.getElementById("sortOptions");
 const radiusInput = document.getElementById('radiusInput');
+const checkboxes = document.querySelectorAll('.list input[type="checkbox"]');
+const firstItemBox = document.getElementById('firstItem');
+const secondItemBox = document.getElementById('secondItem');
+const preferenceInput = document.getElementById('Favour');
+
+const sort_Option_One = document.getElementById("priceMassOne");
+const sort_Method_One = document.getElementById("ascdescone");
+const sort_Option_Two = document.getElementById("priceMassTwo");
+const sort_Method_Two = document.getElementById("ascdesctwo");
+
+
 
 let currentData = [];      // Čia saugome visus gautus produktus iš Flask
 let currentPage = 1;       // Dabartinis puslapis
@@ -34,25 +45,96 @@ async function performSearch(brands = { maxima: true, rimi: true, iki: true }) {
     }
 }
 
-// --- 2. Rūšiavimo logika ---
-function sortProducts(data, sortBy) {
-    return [...data].sort((a, b) => {
-        if (sortBy === "price-asc") return a.price - b.price;
-        if (sortBy === "price-desc") return b.price - a.price;
-        if (sortBy === "protein-asc") return a.baltymai - b.baltymai;
-        if (sortBy === "protein-desc") return b.baltymai - a.baltymai;
-        if (sortBy === "carbs-asc") return a.angliavandeniai - b.angliavandeniai;
-        if (sortBy === "carbs-desc") return b.angliavandeniai - a.angliavandeniai;
-        if (sortBy === "fat-asc") return a.riebalai - b.riebalai;
-        if (sortBy === "fat-desc") return b.riebalai - a.riebalai;
-        return 0;
+let selectedMacros=[];
+
+checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const labelText = document.querySelector(`label[for="${this.id}"]`).innerText;
+        if (this.checked) {
+            // If there are ALREADY 2 items in the list...
+            if (selectedMacros.length === 2) {
+                // 1. Remove the oldest item (index 0) from the array
+                const oldestItem = selectedMacros.shift(); 
+                
+                // 2. Physically uncheck that oldest item's HTML checkbox
+                document.getElementById(oldestItem.id).checked = false;
+            }
+            
+            // Add the new item to the end of the array
+            selectedMacros.push({ id: this.id, name: labelText });
+        } 
+        else {
+            // If the user manually UNCHECKS an item, remove it from the array
+            selectedMacros = selectedMacros.filter(item => item.id !== this.id);
+        }
+        // Update the screen
+        updateUI();
     });
+});
+
+function updateUI() {
+    // 1. Update the Text Boxes
+    firstItemBox.value = selectedMacros[0] ? selectedMacros[0].name : ""; 
+    secondItemBox.value = selectedMacros[1] ? selectedMacros[1].name : "";
+
+
+}
+
+
+// --- 2. Rūšiavimo logika ---
+function sortProducts(data) { 
+
+        console.log(selectedMacros[0].id + " "+selectedMacros[1].id);
+     const n = data.length;
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = 0; j < n - i - 1; j++) {
+        
+let curFirstMacro = getMacro(data,0,j,oneSortPrice);
+let curSecondMacro = getMacro(data,1,j,twoSortPrice);
+let nextFirstMacro = getMacro(data,0,j+1,oneSortPrice);
+let nextSecondMacro = getMacro(data,1,j+1,twoSortPrice);
+
+let a = oneSortAscending? 1:-1;
+let b = twoSortAscending? 1:-1;
+
+let first = (curFirstMacro * preferenceWeight * a) + (curSecondMacro * (10-preferenceWeight) * b);
+let second = (nextFirstMacro * preferenceWeight * a) + (nextSecondMacro * (10-preferenceWeight) * b);
+      if (first > second) {
+        [data[j], data[j + 1]] = [data[j + 1], data[j]];
+      }
+    }
+  }
+    
+    return data;
+}
+function getMacro(data, i ,j,byPrice){
+
+        let Macro;   
+        switch(selectedMacros[i].id){
+            case "protein":
+            Macro = data[j].baltymai;
+            break;
+            case "carbs":
+            Macro = data[j].angliavandeniai;
+            break;
+            case "fat":
+            Macro = data[j].riebalai;
+            break;
+            case "calories":
+            Macro = data[j].calories;
+            break;
+            default:
+                Macro=0;
+        }
+       if(byPrice)
+        {Macro/=data[j].price} 
+        return Macro;
 }
 
 // --- 3. Puslapiavimo ir perbraižymo logika ---
 function applySortingAndRender() {
     const sortBy = sortSelect.value;
-    const sortedData = sortProducts(currentData, sortBy);
+    const sortedData = sortProducts(currentData);
     
     // Paskaičiuojame, kurią dalį masyvo rodyti (pvz., 0-10, 10-20...)
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -194,8 +276,8 @@ function DrawCircle() {
 }
 
 // --- 7. Parduotuvių gavimas iš DB žemėlapyje ---
-const rimiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/rimi_logo.png', iconSize: [32, 32], iconAnchor: [16, 32] });
-const maximaIcon = L.icon({ iconUrl: '/Backend/static\\Icons/maxima_logo.png', iconSize: [32, 15], iconAnchor: [16, 32] });
+const rimiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/rimi_logo.png', iconSize: [32, 25], iconAnchor: [16, 32] });
+const maximaIcon = L.icon({ iconUrl: '/Backend/static\\Icons/maxima_logo.png', iconSize: [32, 12], iconAnchor: [16, 32] });
 const ikiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/iki_logo.png', iconSize: [32, 32], iconAnchor: [16, 32] });
 
 
@@ -205,7 +287,7 @@ async function GetStores() {
         return { maxima: false, rimi: false, iki: false };
     }
 
-    let foundBrands = { maxima: false, rimi: false, iki: false }; // Kintamieji kurie nurodo ar rasta maxima, rimi, iki spindulyje
+    let foundBrands = { maxima: false, rimi: false, iki: false }; 
     storeMarkersGroup.clearLayers();
     const radiusInMeters = searchRadius * 1000;
     const url = `http://localhost:5000/api/stores?lat=${latitude}&lon=${longitude}&radius=${radiusInMeters}`;
@@ -217,28 +299,40 @@ async function GetStores() {
         const stores = await response.json();
         if (Array.isArray(stores)) {
             stores.forEach(store => {
-
                 let icon = null;
-                if (/Maxima.*/i.test(store.name))
-                    { 
-                        icon = maximaIcon;
-                        foundBrands.maxima = true;
-                    }
-                else if (/Rimi.*/i.test(store.name)) 
-                    {
-                        icon = rimiIcon;
-                        foundBrands.rimi = true;
-                    }
-                else if (/Iki.*/i.test(store.name)) 
-                    {
-                        icon = ikiIcon;
-                        foundBrands.iki = true;
-                    }
+                let webUrl = "";
+                let nameLower = (store.name || "").toLowerCase();
 
-                if(icon !=null){
-                L.marker([store.lat, store.lon], { icon: icon })
-                    .addTo(storeMarkersGroup)
-                    .bindPopup(`<b>${store.name}</b>`);
+                // Filtruojame tik 3 tinklus ir priskiriame nuorodas
+                if (nameLower.includes("maxima")) { 
+                    icon = maximaIcon;
+                    webUrl = "https://www.maxima.lt";
+                    foundBrands.maxima = true;
+                } else if (nameLower.includes("rimi")) {
+                    icon = rimiIcon;
+                    webUrl = "https://www.rimi.lt";
+                    foundBrands.rimi = true;
+                } else if (nameLower.includes("iki")) {
+                    icon = ikiIcon;
+                    webUrl = "https://www.iki.lt";
+                    foundBrands.iki = true;
+                }
+
+                // Jei tai viena iš trijų parduotuvių, dedame žymeklį
+                if (icon != null) {
+                    const popupContent = `
+                        <div class="store-popup" style="min-width: 150px;">
+                            <h3 style="margin-bottom: 8px;">${store.name}</h3>
+                            <a href="${webUrl}" target="_blank" 
+                               style="display: inline-block; color: #007bff; text-decoration: none; font-weight: bold; font-size: 13px;">
+                               🌐 Apsilankyti svetainėje &rarr;
+                            </a>
+                        </div>
+                    `;
+
+                    L.marker([store.lat, store.lon], { icon: icon })
+                        .addTo(storeMarkersGroup)
+                        .bindPopup(popupContent);
                 }
             });
         }
@@ -275,8 +369,36 @@ sidebar_close_button.addEventListener("click", () => {
     sidebar.classList.remove('open');
 });
 
+
 // Žemėlapio inicializacija užsikrovus puslapiui
 document.addEventListener("DOMContentLoaded", instantiateMap);
+
+let oneSortPrice =true;
+sort_Option_One.addEventListener('change',function(){
+oneSortPrice = oneSortPrice ? false:true;
+document.querySelector("label[for='priceMassOne']").textContent = oneSortPrice ? "Price" : "Mass";
+});
+
+let oneSortAscending = true;
+sort_Method_One.addEventListener('change', function () {
+    oneSortAscending = !oneSortAscending;
+    document.querySelector("label[for='ascdescone']").textContent = oneSortAscending ? "Ascending" : "Descending";
+});
+let twoSortPrice =true;
+sort_Option_Two.addEventListener('change', function () {
+    twoSortPrice = !twoSortPrice;
+    document.querySelector("label[for='priceMassTwo']").textContent = twoSortPrice ? "Price" : "Mass";
+});
+let twoSortAscending = true;
+sort_Method_Two.addEventListener('change', function () {
+    twoSortAscending = !twoSortAscending;
+    document.querySelector("label[for='ascdesctwo']").textContent = twoSortAscending ? "Ascending" : "Descending";
+});
+let preferenceWeight = 5;
+preferenceInput.addEventListener("input", function() {
+    preferenceWeight = preferenceInput.value; 
+});
+
 
 // --- 9. Adresų Autocomplete Logika ---
 const locationInput = document.getElementById('locationInput');
