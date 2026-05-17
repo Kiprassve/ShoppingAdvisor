@@ -66,3 +66,27 @@ DB_NAME=map_demo
 DB_USER=postgres
 DB_PASS=tavo_duomenu_bazes_slaptazodis
 DB_PORT=5432
+
+### 🚀 2. Projekto paleidimas
+
+Sekite šiuos žingsnius terminale, kad paruoštumėte ir paleistumėte sistemą savo kompiuteryje:
+
+#### A. Priklausomybių įrašymas
+Atsidarykite terminalą projekto aplanke ir įdiekite visas reikalingas Python bibliotekas:
+```bash
+pip install -r requirements.txt
+
+### 💻 3. Naudojimasis sistema per sąsają (Frontend)
+
+Paleidę React aplikaciją savo naršyklėje (dažniausiai adresu `http://localhost:3000`), maisto produktų kainų ir vietovių analizę galite atlikti keliais paprastais žingsniais:
+
+1. **Pažymėkite savo vietą žemėlapyje:**
+    * Spustelkite kairiuoju pelės klavišu bet kurioje interaktyvaus žemėlapio vietoje, kad nustatytumėte savo paieškos centrą (tašką), arba leiskite sistemai automatiškai nustatyti jūsų esamas koordinates.
+2. **Nustatykite paieškos spindulį:**
+    * Šoniniame valdymo skydelyje įveskite norimą atstumą metrais (pvz., įrašius `1500`, sistema ieškos parduotuvių 1.5 km spinduliu). Pagal **OpenStreetMap** duomenis sistema automatiškai suras visas šiame apskritime esančias prekybos vietas.
+3. **Pasirinkite prekybos tinklus:**
+    * Vartotojo sąsajoje pažymėkite arba nuimkite varneles prie konkrečių prekybos tinklų (IKI, Rimi), iš kurių norite matyti prekių asortimentą.
+4. **Filtruokite ir rūšiuokite prekes:**
+    * Viršutiniame skydelyje pasirinkite norimą rikiavimo kriterijų. Galite akimirksniu surikiuoti visus aplinkinių parduotuvių produktus pagal:
+        * **Kainą** (ieškant pigiausių alternatyvų arba lojalumo nuolaidų).
+        * **Mitybinę vertę** (rūšiuojant pagal didžiausią *baltymų* arba mažiausią *angliavandenių* bei *riebalų* kiekį 100-ame gramų).
