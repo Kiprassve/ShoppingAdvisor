@@ -69,6 +69,7 @@ checkboxes.forEach(checkbox => {
         }
         // Update the screen
         updateUI();
+        updatePreferences();
     });
 });
 
@@ -76,42 +77,73 @@ function updateUI() {
     // 1. Update the Text Boxes
     firstItemBox.value = selectedMacros[0] ? selectedMacros[0].name : ""; 
     secondItemBox.value = selectedMacros[1] ? selectedMacros[1].name : "";
+    
+}
 
+function updatePreferences() {
+    const count = selectedMacros.length;
 
+    const preferenceDiv = document.querySelector('.Preference');
+    const prioritiesTitle = document.querySelector('.lowerContainer > .title');
+
+    preferenceDiv.style.display = count === 0 ? 'none' : 'flex';
+    prioritiesTitle.style.display = count === 0 ? 'none' : 'block';
+
+    const firstHalf = [
+        document.querySelector("label[for='priceMassOne']"),
+        document.querySelector("label[for='ascdescone']"),
+        firstItemBox,
+    ];
+
+    const secondHalf = [
+        document.querySelector("label[for='priceMassTwo']"),
+        document.querySelector("label[for='ascdesctwo']"),
+        preferenceInput,
+        secondItemBox
+    ];
+
+    firstHalf.forEach(el => el.style.display = count >= 1 ? '' : 'none');
+    secondHalf.forEach(el => el.style.display = count >= 2 ? '' : 'none');
 }
 
 
 // --- 2. Rūšiavimo logika ---
 function sortProducts(data) { 
-    // GUARD CLAUSE: If data is empty or user hasn't selected 2 macros yet, skip sorting
-    if (!data || data.length === 0) return [];
-    if (!selectedMacros || selectedMacros.length < 2) {
-        console.warn("Pasirinkite bent 2 makroelementus rūšiavimui!");
-        return data; // Return the data as-is without crashing
+
+     const n = data.length;
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = 0; j < n - i - 1; j++) {
+        
+let curFirstMacro = getMacro(data,0,j,oneSortPrice);
+let curSecondMacro = getMacro(data,1,j,twoSortPrice);
+let nextFirstMacro = getMacro(data,0,j+1,oneSortPrice);
+let nextSecondMacro = getMacro(data,1,j+1,twoSortPrice);
+if(curFirstMacro==0)
+{
+        [data[j], data[j + 1]] = [data[j + 1], data[j]];
+}
+else{
+let a = oneSortAscending? 1:-1;
+let b = twoSortAscending? 1:-1;
+let first =0;
+let second = 0;
+if(selectedMacros[1]==null)
+    {
+             first = (curFirstMacro * preferenceWeight * a);
+             second = (nextFirstMacro * preferenceWeight * a);
     }
-
-    console.log(selectedMacros[0].id + " " + selectedMacros[1].id);
-    const n = data.length;
-
-    for (let i = 0; i < n - 1; i++) {
-        for (let j = 0; j < n - i - 1; j++) {
-            
-            let curFirstMacro = getMacro(data, 0, j, oneSortPrice);
-            let curSecondMacro = getMacro(data, 1, j, twoSortPrice);
-            let nextFirstMacro = getMacro(data, 0, j + 1, oneSortPrice);
-            let nextSecondMacro = getMacro(data, 1, j + 1, twoSortPrice);
-
-            let a = oneSortAscending ? 1 : -1;
-            let b = twoSortAscending ? 1 : -1;
-
-            let first = (curFirstMacro * preferenceWeight * a) + (curSecondMacro * (10 - preferenceWeight) * b);
-            let second = (nextFirstMacro * preferenceWeight * a) + (nextSecondMacro * (10 - preferenceWeight) * b);
-
-            if (first > second) {
-                [data[j], data[j + 1]] = [data[j + 1], data[j]];
-            }
+    else
+        {
+             first = (curFirstMacro * preferenceWeight * a) + (curSecondMacro * (10-preferenceWeight) * b);
+             second = (nextFirstMacro * preferenceWeight * a) + (nextSecondMacro * (10-preferenceWeight) * b);
         }
+
+      if (first > second) {
+        [data[j], data[j + 1]] = [data[j + 1], data[j]];
+      }
     }
+    }
+  }
     
     return data;
 }
@@ -119,6 +151,7 @@ function sortProducts(data) {
 function getMacro(data, i ,j,byPrice){
 
         let Macro;   
+        if(selectedMacros[i]==null){return 0;}
         switch(selectedMacros[i].id){
             case "protein":
             Macro = data[j].baltymai;
@@ -137,12 +170,18 @@ function getMacro(data, i ,j,byPrice){
         }
        if(byPrice)
         {Macro/=data[j].price} 
+       else
+        {
+           if(data[j].weight!=0)
+            {
+                Macro/=data[j].weight
+            }
+        }
         return Macro;
 }
 
 // --- 3. Puslapiavimo ir perbraižymo logika ---
 function applySortingAndRender() {
-    const sortBy = sortSelect.value;
     const sortedData = sortProducts(currentData);
     
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -430,10 +469,6 @@ async function GetStores() {
 // --- 8. Event Listeners ---
 
 // Rūšiavimo keitimas
-sortSelect.addEventListener("change", () => {
-    currentPage = 1; // Grįžtame į pradžią pakeitus rūšiavimą
-    applySortingAndRender();
-});
 
 // Spindulio keitimas
 radiusInput.addEventListener("input", function() {
@@ -488,3 +523,4 @@ let preferenceWeight = 5;
 preferenceInput.addEventListener("input", function() {
     preferenceWeight = preferenceInput.value; 
 });
+document.addEventListener("DOMContentLoaded", updatePreferences);
