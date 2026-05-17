@@ -145,7 +145,6 @@ function applySortingAndRender() {
     const sortBy = sortSelect.value;
     const sortedData = sortProducts(currentData);
     
-    // Paskaičiuojame, kurią dalį masyvo rodyti (pvz., 0-10, 10-20...)
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const paginatedData = sortedData.slice(startIndex, endIndex);
@@ -191,7 +190,7 @@ function renderList(data) {
     });
 }
 
-// --- 5. Puslapiavimo mygtukų valdymas ---
+// --- 5. Puslapiavimo mygtukų valdymas (Suvaldyta mygtukų gausa) ---
 function renderPaginationControls(totalItems) {
     const paginationContainer = document.getElementById('pagination');
     if (!paginationContainer) return;
@@ -199,6 +198,7 @@ function renderPaginationControls(totalItems) {
     paginationContainer.innerHTML = '';
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     
+    // Jei puslapių nėra arba yra tik 1, paslepiame konteinerį ir baigiame darbą
     if (totalPages <= 1) {
         paginationContainer.style.display = 'none';
         return;
@@ -206,31 +206,106 @@ function renderPaginationControls(totalItems) {
         paginationContainer.style.display = 'flex';
     }
 
-    // "Atgal" mygtukas
+    // Pagalbinė funkcija vienodo mygtuko sukūrimui, kad kodas nesidubliuotų
+    function createPageButton(pageNumber, text = pageNumber, isActive = false) {
+        const btn = document.createElement('button');
+        btn.innerText = text;
+        if (isActive) btn.className = 'active';
+        btn.onclick = () => {
+            currentPage = pageNumber;
+            applySortingAndRender();
+            list.scrollTo(0, 0); // Atstato sąrašą į viršų persijungus puslapiui
+        };
+        return btn;
+    }
+
+    // Pagalbinė funkcija daugtaškio (...) sukūrimui su specialia klase stiliams
+    function createEllipsis() {
+        const span = document.createElement('span');
+        span.innerText = '...';
+        span.className = 'pagination-ellipsis';
+        return span;
+    }
+
+    // ==========================================
+    // REŽIMAS A: Mažai puslapių (iki 7 puslapių)
+    // Tiesiog išvedame visus skaičius iš eilės be jokių daugtaškių
+    // ==========================================
+    if (totalPages <= 7) {
+        // "Atgal" mygtukas («)
+        const prevBtn = document.createElement('button');
+        prevBtn.innerHTML = '&laquo;';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => {
+            currentPage--;
+            applySortingAndRender();
+            list.scrollTo(0, 0);
+        };
+        paginationContainer.appendChild(prevBtn);
+
+        // Sugeneruojame visus mygtukus iš eilės
+        for (let i = 1; i <= totalPages; i++) {
+            paginationContainer.appendChild(createPageButton(i, i, i === currentPage));
+        }
+
+        // "Pirmyn" mygtukas (»)
+        const nextBtn = document.createElement('button');
+        nextBtn.innerHTML = '&raquo;';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => {
+            currentPage++;
+            applySortingAndRender();
+            list.scrollTo(0, 0);
+        };
+        paginationContainer.appendChild(nextBtn);
+        
+        return; // Baigiame funkciją, žemesnis kodas nebus vykdomas
+    }
+
+    // ==========================================
+    // REŽIMAS B: Daug puslapių (virš 7 puslapių)
+    // Įjungiamas dinaminis langas ir daugtaškiai
+    // ==========================================
+
+    // "Atgal" mygtukas («)
     const prevBtn = document.createElement('button');
     prevBtn.innerHTML = '&laquo;';
     prevBtn.disabled = currentPage === 1;
     prevBtn.onclick = () => {
         currentPage--;
         applySortingAndRender();
-        list.scrollTo(0, 0); // Grįžtame į sąrašo viršų
+        list.scrollTo(0, 0);
     };
     paginationContainer.appendChild(prevBtn);
 
-    // Puslapių numeriai
-    for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement('button');
-        btn.innerText = i;
-        if (i === currentPage) btn.className = 'active';
-        btn.onclick = () => {
-            currentPage = i;
-            applySortingAndRender();
-            list.scrollTo(0, 0);
-        };
-        paginationContainer.appendChild(btn);
+    const maxVisibleButtons = 2; // Kiek skaičių rodyti į kairę ir dešinę nuo dabartinio
+
+    // 1. Visada pridedame pirmąjį puslapį
+    paginationContainer.appendChild(createPageButton(1, 1, currentPage === 1));
+
+    // Kairysis daugtaškis: jei tarp 1-o puslapio ir matomo lango pradžios yra tarpas
+    if (currentPage - maxVisibleButtons > 2) {
+        paginationContainer.appendChild(createEllipsis());
     }
 
-    // "Pirmyn" mygtukas
+    // Paskaičiuojame dinaminio lango pradžią ir pabaigą aplink dabartinį puslapį
+    let startPage = Math.max(2, currentPage - maxVisibleButtons);
+    let endPage = Math.min(totalPages - 1, currentPage + maxVisibleButtons);
+
+    // 2. Sugeneruojame vidurinius puslapius aplink dabartinį
+    for (let i = startPage; i <= endPage; i++) {
+        paginationContainer.appendChild(createPageButton(i, i, i === currentPage));
+    }
+
+    // Dešinysis daugtaškis: jei tarp matomo lango pabaigos ir paskutinio puslapio yra tarpas
+    if (currentPage + maxVisibleButtons < totalPages - 1) {
+        paginationContainer.appendChild(createEllipsis());
+    }
+
+    // 3. Visada pridedame paskutinį puslapį
+    paginationContainer.appendChild(createPageButton(totalPages, totalPages, currentPage === totalPages));
+
+    // "Pirmyn" mygtukas (»)
     const nextBtn = document.createElement('button');
     nextBtn.innerHTML = '&raquo;';
     nextBtn.disabled = currentPage === totalPages;
