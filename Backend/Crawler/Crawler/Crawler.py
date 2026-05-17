@@ -294,10 +294,10 @@ if __name__ == "__main__":
     # Nustatome norimą laiką
     # Docker laikas atsilieka 3 valandom todel reikia
     TARGET_HOUR = 6
-    TARGET_MINUTE = 54
-
+    TARGET_MINUTE = 30
+     # Run once immediately on startup so the table/data exists right away
+    print("=== Running initial scrape on startup... ===", flush=True)
     start_scraping_job()
-
     print(f"=== Skraperis paleistas. Laukiama {TARGET_HOUR}:{TARGET_MINUTE} ===", flush=True)
     
     while True:

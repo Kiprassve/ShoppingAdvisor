@@ -392,7 +392,6 @@ let oneSortAscending = true;
 sort_Method_One.addEventListener('change', function () {
     oneSortAscending = !oneSortAscending;
     document.querySelector("label[for='ascdescone']").textContent = oneSortAscending ? "Ascending" : "Descending";
-    updateDisplays();
 });
 let twoSortPrice =true;
 sort_Option_Two.addEventListener('change', function () {
