@@ -219,7 +219,7 @@ def Rimi_crawler(url):
             url=None
             
     return All_Products
-if __name__ == "__main__":
+""" if __name__ == "__main__":
     # 1. Gauname aplanką, kuriame yra šis Crawler.py failas
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -232,7 +232,7 @@ if __name__ == "__main__":
         break
     data_to_json=[product.__dict__ for product in All_Products]
     with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(data_to_json, f, ensure_ascii=False, indent=4)
+        json.dump(data_to_json, f, ensure_ascii=False, indent=4) """
 
 
 #---TESTAS-----
@@ -393,7 +393,7 @@ def categorie_grabber(url):
     #         print(g_category)
     print("category grabber done")
                                         
-categorie_grabber(IKI_url_categories)
+#categorie_grabber(IKI_url_categories)
 
 categoryIds=[]
 #Gets subcategorys of products. "Milk procducts" -> "Milk", "Cheeses", "Ice cream" ...
@@ -415,8 +415,7 @@ def subcategorie_grabber(url):
                 # print(category.get('id'))
     print("sub category grabber done")
     
-subcategorie_grabber(IKI_url_categories)
-
+#subcategorie_grabber(IKI_url_categories)
 
 payload={
     "fromIndex":0,
@@ -446,8 +445,8 @@ def IKI_crawler(url):
    
     #print(response.text)
     i=0
-    limit=60;
-    fromIndex=0;
+    limit=60
+    fromIndex=0
     All_Products=[]
   
     while True:
@@ -518,7 +517,7 @@ def IKI_crawler(url):
         fromIndex=fromIndex+limit
 
 
-if __name__ == "__main__":
+""" if __name__ == "__main__":
     # 1. Gauname aplanką, kuriame yra šis Crawler.py failas
     current_dir = os.path.dirname(os.path.abspath(__file__))
     # 2. Sujungiame tą aplanką su failo pavadinimu
@@ -530,10 +529,245 @@ if __name__ == "__main__":
     if All_Products2:
         data_to_json2=[product.__dict__ for product in All_Products2]
         with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(data_to_json2, f, ensure_ascii=False, indent=4)
+            json.dump(data_to_json2, f, ensure_ascii=False, indent=4) """
             
 
-def start_scraping_job():
+#----------------Maxima crawler-----------------
+url_maxima=[
+    "https://barbora.lt/pieno-gaminiai-kiausiniai-ir-majonezas",
+    "https://barbora.lt/darzoves-ir-vaisiai",
+    "https://barbora.lt/duonos-gaminiai-ir-konditerija",
+    "https://barbora.lt/mesa-zuvis-ir-kulinarija",
+    "https://barbora.lt/bakaleja",
+    "https://barbora.lt/saldytas-maistas",
+    "https://barbora.lt/gerimai"
+
+]
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+}
+
+def Maxima_html_crawler(base_url):
+    All_Products = []
+    page_number = 1
+    
+    # SAUGIKLIS: Sekame šioje kategorijoje jau matytų produktų URL adresus
+    seen_product_urls = set()
+    
+    print(f"\n=========================================")
+    print(f"STARTING CATEGORY: {base_url}")
+    print(f"=========================================")
+
+    while True:
+        # 1. Sukuriamas dinaminis puslapio URL adresas
+        paginated_url = f"{base_url}?page={page_number}"
+        print(f"\n--- Scraping Page {page_number} ---")
+        print(f"URL: {paginated_url}")
+        
+        response = requests.get(paginated_url, headers=headers)
+        
+        if response.status_code != 200:
+            print(f"Failed to fetch the HTML view. Status code: {response.status_code}")
+            break # Sustabdomas ciklas, jei puslapis neatsidaro
+            
+        html_content = response.text
+        
+        # Ištraukiame JSON masyvą iš puslapio kodo
+        match = re.search(r'window\.b_productList\s*=\s*(\[[\s\S]*?\]);', html_content)
+        if not match:
+            print("Could not locate metadata variable inside the page HTML scripts. Ending category loop.")
+            break 
+            
+        try:
+            json_data_string = match.group(1)
+            products_data = json.loads(json_data_string)
+            
+            # 1-asis SAUGIKLIS: Jeigu masyvas visiškai tuščias, baigėme puslapius
+            if not products_data:
+                print(f"No more products found (Empty Array). Finished crawling at page {page_number - 1}.")
+                break
+                
+            print(f"Successfully extracted {len(products_data)} products from page {page_number}.")
+            
+            # Kintamasis, kuris stebės, ar šiame puslapyje radome nors vieną NAUJĄ prekę
+            has_new_items_on_page = False
+            
+            for item in products_data:
+                # Produkto URL generavimas
+                slug = item.get("Url", "")
+                product_url = f"https://barbora.lt/produktai/{slug}" if slug else ""
+                
+                # 2-asis SAUGIKLIS (Svarbiausias): Jei šį produktą jau matėme ankstesniuose puslapiuose, praleidžiame jį
+                if product_url in seen_product_urls:
+                    continue
+                
+                # Jei produktas naujas – pažymime jį kaip matytą ir leidžiame puslapio ciklui tęstis
+                seen_product_urls.add(product_url)
+                has_new_items_on_page = True
+                
+                # Basic Metadata Extraction
+                name = str(item.get("title", ""))
+                print(f"Parsing product: {name}")
+                
+                weight_kg = "1"
+                conversion_measure = "vnt"
+                
+                if name:
+                    weight_re = re.search(r'(\d+[,.]?\d*)\s*(g|kg|l|ml|vnt\.?)\b', name, re.IGNORECASE)
+                    if weight_re:
+                        unit = weight_re.group(2).lower()
+                        value_str = weight_re.group(1).replace(",", ".")
+                        
+                        if unit in ["kg", "l"]:
+                            weight_kg = value_str
+                            conversion_measure = unit
+                        elif unit in ["g", "ml"]:
+                            weight_kg = str(float(value_str) / 1000)
+                            conversion_measure = unit
+                        elif "vnt" in unit:
+                            weight_kg = value_str
+                            conversion_measure = "vnt"
+                
+                image_url = item.get("big_image", "") 
+                
+                # Price & Discount Logic
+                item_price = item.get("price", 0.0)
+                item_retail_price = item.get("retail_price")
+                
+                if item_retail_price is not None:
+                    price = str(item_retail_price)
+                    price_discount = str(item_price)
+                else:
+                    price = str(item_price)
+                    price_discount = "0"
+
+                # Initialize default macronutrients values
+                protein = "0"
+                fat = "0"
+                sugar = "0"
+                salt = "0"
+                carbohydrates = "0"
+                calories_kcal = "0"
+                
+                # Request Product Page & Extract Nutrition Facts
+                if product_url:
+                    try:
+                        time.sleep(0.2) # Apsauga nuo anti-scraping blokavimo
+                        
+                        detail_response = requests.get(product_url, headers=headers)
+                        if detail_response.status_code == 200:
+                            product_match = re.search(r'window\.product\s*=\s*(\{[\s\S]*?\});\s*</script>', detail_response.text)
+                            
+                            if product_match:
+                                product_json_str = product_match.group(1)
+                                product_info = json.loads(product_json_str)
+                                
+                                # STRATEGY A: Target structured 'nutrients' block
+                                nutrient_list = product_info.get("nutrients", [])
+                                
+                                if nutrient_list:
+                                    for nutrient in nutrient_list:
+                                        nutrient_name = str(nutrient.get("Name", "")).strip().lower()
+                                        amounts = nutrient.get("Amounts", [])
+                                        
+                                        if not amounts:
+                                            continue
+                                            
+                                        if "energin" in nutrient_name:
+                                            for amt in amounts:
+                                                if amt.get("UnitName") == "Kcal":
+                                                    calories_kcal = str(amt.get("Amount", "0"))
+                                        elif "riebal" in nutrient_name:
+                                            fat = str(amounts[0].get("Amount", "0"))
+                                        elif "angliavanden" in nutrient_name:
+                                            carbohydrates = str(amounts[0].get("Amount", "0"))
+                                        elif "cukr" in nutrient_name:
+                                            sugar = str(amounts[0].get("Amount", "0"))
+                                        elif "baltym" in nutrient_name:
+                                            protein = str(amounts[0].get("Amount", "0"))
+                                        elif "drusk" in nutrient_name:
+                                            salt = str(amounts[0].get("Amount", "0"))
+                                
+                                # STRATEGY B: Fallback to plain text attributes for raw produce
+                                else:
+                                    attributes_obj = product_info.get("attributes", {})
+                                    attr_list = attributes_obj.get("list", []) if isinstance(attributes_obj, dict) else []
+                                    
+                                    for attr in attr_list:
+                                        attr_id = str(attr.get("id", "")).strip().lower()
+                                        attr_val = str(attr.get("value", "")).strip()
+                                        
+                                        if not attr_id or not attr_val: 
+                                            continue
+                                        
+                                        num_match = re.search(r'(\d+[,.]?\d*)', attr_val)
+                                        extracted_val = num_match.group(1).replace(",", ".") if num_match else "0"
+                                        
+                                        if "energin" in attr_id:
+                                            kcal_match = re.search(r'(\d+[,.]?\d*)\s*Kcal', attr_val, re.IGNORECASE)
+                                            if kcal_match:
+                                                calories_kcal = kcal_match.group(1).replace(",", ".")
+                                        elif "riebal" in attr_id and "sočiosios" not in attr_id:
+                                            fat = extracted_val
+                                        elif "angliavanden" in attr_id:
+                                            carbohydrates = extracted_val
+                                        elif "cukr" in attr_id:
+                                            sugar = extracted_val
+                                        elif "baltym" in attr_id:
+                                            protein = extracted_val
+                                        elif "drusk" in attr_id:
+                                            salt = extracted_val
+                                            
+                                print(f"-> Macros found - Cal: {calories_kcal}, P: {protein}, F: {fat}, C: {carbohydrates}")
+                            else:
+                                print("-> Warning: Could not locate window.product object.")
+                        else:
+                            print(f"-> Warning: Failed loading detail view. Status code: {detail_response.status_code}")
+                    except Exception as detail_err:
+                        print(f"-> Error crawling individual product detail page: {detail_err}")
+
+                # Instantiation
+                product_obj = Product.Product(
+                    name, weight_kg, conversion_measure, protein, fat, 
+                    sugar, salt, carbohydrates, calories_kcal, 
+                    product_url, image_url, price, price_discount
+                )
+                All_Products.append(product_obj)
+            
+            # BEGALINIO CIKLO STABDYS: Jeigu visos prekės šiame puslapyje jau buvo nuskaitytos anksčiau,
+            # tai reiškia, kad puslapis mus nukreipė atgal į pradžią arba nebėra naujo turinio.
+            if not has_new_items_on_page:
+                print(f"Detected duplicate page content/wrap-around redirect. Safely stopping at page {page_number}.")
+                break
+
+        except Exception as e:
+            print("Regex matched, but failed parsing to clean object:", e)
+            break 
+
+        # Einame į sekantį puslapį
+        page_number += 1
+        time.sleep(1) # Saugus tarpas tarp puslapių užklausų
+        
+    return All_Products
+
+#Maxima_html_crawler(url_maxima)
+
+if __name__ == "__main__":
+    # 1. Gauname aplanką, kuriame yra šis Crawler.py failas
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    # 2. Sujungiame tą aplanką su failo pavadinimu
+    file_path = os.path.join(current_dir, "Maxima_products.json")
+
+    All_Products2=[]
+    for url in url_maxima:
+        All_Products2=All_Products2+Maxima_html_crawler(url)
+    #Writes products into a file
+    if All_Products2:
+        data_to_json2=[product.__dict__ for product in All_Products2]
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data_to_json2, f, ensure_ascii=False, indent=4)
+
+""" def start_scraping_job():
     print(f"[{datetime.now()}] Skreipinimas pradedamas...")
     
     # RIMI dalis (per visus URL)
@@ -579,4 +813,4 @@ if __name__ == "__main__":
                 time.sleep(60)
         
         # Tikriname laiką kas sekundę, kad nepraleistume minutės starto
-        time.sleep(1)
+        time.sleep(1) """
