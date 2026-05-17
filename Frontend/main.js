@@ -442,10 +442,16 @@ radiusInput.addEventListener("input", function() {
 });
 
 // Pagrindinis paieškos mygtukas
+// Pagrindinis paieškos mygtukas
 search_button.addEventListener("click", async function() {
+    // Patikriname, ar koordinatės vis dar yra pradinėje 0 būsenoje
+    if (latitude === 0 && longitude === 0) {
+        alert("Prašome pasirinkti vietą žemėlapyje dukart spustelint pelės klavišu!");
+        return; // Sustabdo funkcijos vykdymą, kad toliau neieškotų duomenų
+    }
+
     const foundBrands = await GetStores(); // Ieškom parduotuvių aplink
     performSearch(foundBrands); // Skreipinam prekes
-    
 });
 
 // Sidebar uždarymas
