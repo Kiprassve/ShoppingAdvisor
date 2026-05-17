@@ -4,13 +4,13 @@ services:
   db:
     image: postgis/postgis:16-3.4
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: map_demo
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-password123}
+      POSTGRES_DB: ${DB_NAME:-map_demo}
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data
 
   importer:
     image: ubuntu:22.04
@@ -22,7 +22,7 @@ services:
       - ./Frontend/import.sh:/osm/import.sh  # Failas yra Frontend kataloge
       - ./Frontend/kaunas.lua:/osm/kaunas.lua
     environment:
-     - PGPASSWORD=password123
+     - PGPASSWORD=${DB_PASS:-password123}
      - DEBIAN_FRONTEND=noninteractive
     command: >
       bash -c "apt-get update && apt-get install -y osm2pgsql postgresql-client && 
@@ -40,7 +40,11 @@ services:
       - "5000:5000"
     environment:
       - PYTHONUNBUFFERED=1
-      - DATABASE_URL=postgresql://postgres:password123@db:5432/map_demo
+      - DB_HOST=${DB_HOST:-db}
+      - DB_NAME=${DB_NAME:-map_demo}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASS=${DB_PASS:-password123}
+      - DB_PORT=${DB_PORT:-5432}
       - PYTHONPATH=/app:/app/Crawler:/app/Crawler/Crawler
     depends_on:
       - db
@@ -58,13 +62,20 @@ services:
       context: ./Backend
       dockerfile: Dockerfile
     command: python Crawler/Crawler/Crawler.py
+    volumes:
+      - ./Backend:/app
     environment:
       - PYTHONUNBUFFERED=1
-      - DATABASE_URL=postgresql://postgres:password123@db:5432/map_demo
-      - PYTHONPATH=/app:/app/Crawler
+      - DB_HOST=${DB_HOST:-db}
+      - DB_NAME=${DB_NAME:-map_demo}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASS=${DB_PASS:-password123}
+      - DB_PORT=${DB_PORT:-5432}
+      - PYTHONPATH=/app:/app/Crawler:/app/Crawler/Crawler
     depends_on:
       - db
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
     restart: always
-
-volumes:
-  pgdata:

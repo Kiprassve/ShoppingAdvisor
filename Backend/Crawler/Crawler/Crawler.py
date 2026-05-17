@@ -20,11 +20,25 @@ from datetime import datetime
 import psycopg2
 from database import save_products_to_db
 
+import tracemalloc
+
 #auto scrape
 import time
 import urllib.request
 
 import Product
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+DB_HOST = os.environ.get("DB_HOST", "db")
+DB_NAME = os.environ.get("DB_NAME", "map_demo")
+DB_USER = os.environ.get("DB_USER", "postgres")
+DB_PASS = os.environ.get("DB_PASS", "password123")
+DB_PORT = os.environ.get("DB_PORT", "5432")
+
+DB_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -235,41 +249,7 @@ def Rimi_crawler(url):
         json.dump(data_to_json, f, ensure_ascii=False, indent=4) """
 
 
-#---TESTAS-----
-# Sviestas="https://www.rimi.lt/e-parduotuve/lt/produktai/bakaleja/cukrus-ir-saldikliai/baltasis-cukrus-/cukrus-panevezio-plius-1-kg/p/148646"
-# response=requests.get(Sviestas,headers=headers)
-# soup2=BeautifulSoup((response.content),"html.parser")
-# actualprice=discountedprice="0"
-# price_div = soup2.find_all('div')
 
-# for p in price_div:
-#        cents=p.find("span", class_="cents")
-#        euros=p.find("span", class_="major")
-#        price_class=p.get('class')
-#        if cents and euros:
-#             cents_re=re.search(r'\d+',str(cents))
-#             euros_re=re.search(r'\d+',str(euros))
-#             #print(str(euros)+" "+str(cents))
-#             if cents_re and euros_re:
-#                 discountedprice=str(euros_re.group(0))+"."+str(cents_re.group(0))
-#        if price_class and "price" in price_class:       
-#            euro_re=re.search(r'\d+',str(p.find("span")))
-#            cent_re=re.search(r'\d+',str(p.find("sup")))
-#            if cent_re and euro_re:
-#                actualprice=str(euro_re.group(0))+"."+str(cent_re.group(0))
-           
-#            oldprice=p.find("p", class_="price__old-price")
-#            #print(oldprice)
-#            if oldprice:
-              
-#                discountedprice=actualprice
-#                actualprice_re=re.search(r'\d+\.?\,?\d*',str(oldprice))
-#                if actualprice_re:
-#                    actualprice=actualprice_re.group(0)
-               
-# if actualprice!="0" or discountedprice!="0":
-#       print("Actual price:"+ str(actualprice))
-#       print("Discounted price:"+str(discountedprice))
   
 #------------------------------IKI CRAWLER---------------------------------
 headers2 = {
@@ -750,9 +730,9 @@ def Maxima_html_crawler(base_url):
         
     return All_Products
 
-#Maxima_html_crawler(url_maxima)
 
-if __name__ == "__main__":
+
+""" if __name__ == "__main__":
     # 1. Gauname aplanką, kuriame yra šis Crawler.py failas
     current_dir = os.path.dirname(os.path.abspath(__file__))
     # 2. Sujungiame tą aplanką su failo pavadinimu
@@ -765,9 +745,12 @@ if __name__ == "__main__":
     if All_Products2:
         data_to_json2=[product.__dict__ for product in All_Products2]
         with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(data_to_json2, f, ensure_ascii=False, indent=4)
+            json.dump(data_to_json2, f, ensure_ascii=False, indent=4) """
 
-""" def start_scraping_job():
+# --- AUTOMATIZACIJOS LOGIKA ---
+
+def start_scraping_job():
+    tracemalloc.start()
     print(f"[{datetime.now()}] Skreipinimas pradedamas...")
     
     # RIMI dalis (per visus URL)
@@ -785,6 +768,13 @@ if __name__ == "__main__":
     save_products_to_db(all_iki, "Iki")
     
     print(f"[{datetime.now()}] Visi duomenys sėkmingai atnaujinti.")
+
+    snapshot = tracemalloc.take_snapshot()
+    top_stats = snapshot.statistics('lineno')
+
+    print("[Atminties naudojimo Top 10]")
+    for stat in top_stats[:10]:
+        print(stat)
 
 if __name__ == "__main__":
     # Nustatome norimą laiką
@@ -813,4 +803,4 @@ if __name__ == "__main__":
                 time.sleep(60)
         
         # Tikriname laiką kas sekundę, kad nepraleistume minutės starto
-        time.sleep(1) """
+        time.sleep(1)

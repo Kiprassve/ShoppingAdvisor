@@ -576,6 +576,8 @@ font-family: Arial, Helvetica, sans-serif;
 .Preference {
     display: flex;
     align-items: center;   /* vertically align */
+    
+    justify-content: center;
     gap: 10px;             /* space between items */
     width: 500px;
 }

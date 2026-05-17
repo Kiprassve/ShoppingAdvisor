@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-    <title>Price Scraper</title>
+    <title>Shopping Advisor</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
@@ -13,12 +13,16 @@
     <div id="map"></div>
 
     <div class="upperContainer">
+<<<<<<< HEAD
         <div class="search-wrapper">
             <input type="text" id="locationInput" placeholder="Search Address..." class="custom-btn" autocomplete="off"/>
             <div id="autocomplete-list" class="autocomplete-items"></div>
         </div>
 
         <button class="custom-btn"><img src="/Backend/static/Icons/pin.png">Place Pin</button>
+=======
+        <input type="text" id="locationInput" placeholder="Search Address..." class="custom-btn"/>
+>>>>>>> ae7a0755a811762d64daec479fabda5bb99b69d3
         <button class="custom-btn" id="search-btn"><img src="/Backend/static/Icons/search.png">Search</button>
     </div>
 
@@ -46,13 +50,6 @@
                 </div>
             </div>
 
-            <div class="sort-container">
-                <select id="sortOptions" class="sort-select">
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
-                    <option value="protein-desc">Protein: High to Low</option>
-                </select>
-            </div>
         </div>
         
         <div id="resultsList" class="results-container"></div>

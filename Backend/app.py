@@ -4,12 +4,36 @@ from flask_cors import CORS
 from Crawler.Crawler.Crawler import Rimi_crawler
 import psycopg2
 import os
+<<<<<<< HEAD
  
 app = Flask(__name__, static_folder='static')
 CORS(app)
  
 DB_URL = os.environ.get("DATABASE_URL","postgresql://postgres:password123@db:5432/map_demo")
  
+=======
+
+from dotenv import load_dotenv
+load_dotenv()
+
+app = Flask(__name__, static_folder='static')
+CORS(app)
+
+DB_HOST = os.environ.get("DB_HOST", "db")
+DB_NAME = os.environ.get("DB_NAME", "map_demo")
+DB_USER = os.environ.get("DB_USER", "postgres")
+DB_PASS = os.environ.get("DB_PASS", "password123")
+DB_PORT = os.environ.get("DB_PORT", "5432")
+
+DB_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+logo_mapping = {
+    "maxima": "http://127.0.0.1:5000/static/Icons/maxima_logo.png",
+    "rimi": "http://127.0.0.1:5000/static/Icons/rimi_logo.png",
+    "iki": "http://127.0.0.1:5000/static/Icons/iki_logo.png"
+}
+
+>>>>>>> ae7a0755a811762d64daec479fabda5bb99b69d3
 @app.route('/api/scrape', methods=['GET'])
 def get_data():
     # Gauname filtrus iš užklausos (pvz., ?rimi=true&iki=true)
@@ -31,7 +55,7 @@ def get_data():
         # Naudojame IN operatorių, kad paimtume duomenis tik iš pasirinktų parduotuvių
         # Taip pat surūšiuojame pagal sukūrimo laiką, kad matytume naujausius skreipinimo rezultatus
         query = """
-            SELECT name, price, image_url, protein, carbohydrates, fat, calories, store_name 
+            SELECT name, price, image_url, protein, carbohydrates, fat, calories, store_name,weight 
             FROM products 
             WHERE store_name = ANY(%s)
             ORDER BY id DESC
@@ -43,6 +67,16 @@ def get_data():
         
         data = []
         for row in rows:
+            # Logo detection
+            store_name_raw = row[7] or ""
+            store_name_lower = store_name_raw.lower().strip()
+            
+            matched_logo = "/static/Icons/default_logo.png"
+            for brand in logo_mapping:
+                if brand in store_name_lower:
+                    matched_logo = logo_mapping[brand]
+                    break
+
             data.append({
                 "name": row[0],
                 "price": float(row[1]),
@@ -52,6 +86,7 @@ def get_data():
                 "riebalai": float(row[5] or 0),
                 "calories": float(row[6] or 0),
                 "store": row[7],
+                "weight": float(row[8]) if row[8] else None,  
                 "storeLogo": f"[http://127.0.0.1:5000/static/Icons/](http://127.0.0.1:5000/static/Icons/){row[7].lower()}_logo.png"
             })
             

@@ -69,6 +69,7 @@ checkboxes.forEach(checkbox => {
         }
         // Update the screen
         updateUI();
+        updatePreferences();
     });
 });
 
@@ -76,15 +77,39 @@ function updateUI() {
     // 1. Update the Text Boxes
     firstItemBox.value = selectedMacros[0] ? selectedMacros[0].name : ""; 
     secondItemBox.value = selectedMacros[1] ? selectedMacros[1].name : "";
+    
+}
 
+function updatePreferences() {
+    const count = selectedMacros.length;
 
+    const preferenceDiv = document.querySelector('.Preference');
+    const prioritiesTitle = document.querySelector('.lowerContainer > .title');
+
+    preferenceDiv.style.display = count === 0 ? 'none' : 'flex';
+    prioritiesTitle.style.display = count === 0 ? 'none' : 'block';
+
+    const firstHalf = [
+        document.querySelector("label[for='priceMassOne']"),
+        document.querySelector("label[for='ascdescone']"),
+        firstItemBox,
+    ];
+
+    const secondHalf = [
+        document.querySelector("label[for='priceMassTwo']"),
+        document.querySelector("label[for='ascdesctwo']"),
+        preferenceInput,
+        secondItemBox
+    ];
+
+    firstHalf.forEach(el => el.style.display = count >= 1 ? '' : 'none');
+    secondHalf.forEach(el => el.style.display = count >= 2 ? '' : 'none');
 }
 
 
 // --- 2. Rūšiavimo logika ---
 function sortProducts(data) { 
 
-        console.log(selectedMacros[0].id + " "+selectedMacros[1].id);
      const n = data.length;
   for (let i = 0; i < n - 1; i++) {
     for (let j = 0; j < n - i - 1; j++) {
@@ -93,23 +118,40 @@ let curFirstMacro = getMacro(data,0,j,oneSortPrice);
 let curSecondMacro = getMacro(data,1,j,twoSortPrice);
 let nextFirstMacro = getMacro(data,0,j+1,oneSortPrice);
 let nextSecondMacro = getMacro(data,1,j+1,twoSortPrice);
-
+if(curFirstMacro==0)
+{
+        [data[j], data[j + 1]] = [data[j + 1], data[j]];
+}
+else{
 let a = oneSortAscending? 1:-1;
 let b = twoSortAscending? 1:-1;
+let first =0;
+let second = 0;
+if(selectedMacros[1]==null)
+    {
+             first = (curFirstMacro * preferenceWeight * a);
+             second = (nextFirstMacro * preferenceWeight * a);
+    }
+    else
+        {
+             first = (curFirstMacro * preferenceWeight * a) + (curSecondMacro * (10-preferenceWeight) * b);
+             second = (nextFirstMacro * preferenceWeight * a) + (nextSecondMacro * (10-preferenceWeight) * b);
+        }
 
-let first = (curFirstMacro * preferenceWeight * a) + (curSecondMacro * (10-preferenceWeight) * b);
-let second = (nextFirstMacro * preferenceWeight * a) + (nextSecondMacro * (10-preferenceWeight) * b);
       if (first > second) {
         [data[j], data[j + 1]] = [data[j + 1], data[j]];
       }
+    }
     }
   }
     
     return data;
 }
+
 function getMacro(data, i ,j,byPrice){
 
         let Macro;   
+        if(selectedMacros[i]==null){return 0;}
         switch(selectedMacros[i].id){
             case "protein":
             Macro = data[j].baltymai;
@@ -128,15 +170,20 @@ function getMacro(data, i ,j,byPrice){
         }
        if(byPrice)
         {Macro/=data[j].price} 
+       else
+        {
+           if(data[j].weight!=0)
+            {
+                Macro/=data[j].weight
+            }
+        }
         return Macro;
 }
 
 // --- 3. Puslapiavimo ir perbraižymo logika ---
 function applySortingAndRender() {
-    const sortBy = sortSelect.value;
     const sortedData = sortProducts(currentData);
     
-    // Paskaičiuojame, kurią dalį masyvo rodyti (pvz., 0-10, 10-20...)
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const paginatedData = sortedData.slice(startIndex, endIndex);
@@ -182,7 +229,7 @@ function renderList(data) {
     });
 }
 
-// --- 5. Puslapiavimo mygtukų valdymas ---
+// --- 5. Puslapiavimo mygtukų valdymas (Suvaldyta mygtukų gausa) ---
 function renderPaginationControls(totalItems) {
     const paginationContainer = document.getElementById('pagination');
     if (!paginationContainer) return;
@@ -190,6 +237,7 @@ function renderPaginationControls(totalItems) {
     paginationContainer.innerHTML = '';
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     
+    // Jei puslapių nėra arba yra tik 1, paslepiame konteinerį ir baigiame darbą
     if (totalPages <= 1) {
         paginationContainer.style.display = 'none';
         return;
@@ -197,31 +245,106 @@ function renderPaginationControls(totalItems) {
         paginationContainer.style.display = 'flex';
     }
 
-    // "Atgal" mygtukas
+    // Pagalbinė funkcija vienodo mygtuko sukūrimui, kad kodas nesidubliuotų
+    function createPageButton(pageNumber, text = pageNumber, isActive = false) {
+        const btn = document.createElement('button');
+        btn.innerText = text;
+        if (isActive) btn.className = 'active';
+        btn.onclick = () => {
+            currentPage = pageNumber;
+            applySortingAndRender();
+            list.scrollTo(0, 0); // Atstato sąrašą į viršų persijungus puslapiui
+        };
+        return btn;
+    }
+
+    // Pagalbinė funkcija daugtaškio (...) sukūrimui su specialia klase stiliams
+    function createEllipsis() {
+        const span = document.createElement('span');
+        span.innerText = '...';
+        span.className = 'pagination-ellipsis';
+        return span;
+    }
+
+    // ==========================================
+    // REŽIMAS A: Mažai puslapių (iki 7 puslapių)
+    // Tiesiog išvedame visus skaičius iš eilės be jokių daugtaškių
+    // ==========================================
+    if (totalPages <= 7) {
+        // "Atgal" mygtukas («)
+        const prevBtn = document.createElement('button');
+        prevBtn.innerHTML = '&laquo;';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => {
+            currentPage--;
+            applySortingAndRender();
+            list.scrollTo(0, 0);
+        };
+        paginationContainer.appendChild(prevBtn);
+
+        // Sugeneruojame visus mygtukus iš eilės
+        for (let i = 1; i <= totalPages; i++) {
+            paginationContainer.appendChild(createPageButton(i, i, i === currentPage));
+        }
+
+        // "Pirmyn" mygtukas (»)
+        const nextBtn = document.createElement('button');
+        nextBtn.innerHTML = '&raquo;';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => {
+            currentPage++;
+            applySortingAndRender();
+            list.scrollTo(0, 0);
+        };
+        paginationContainer.appendChild(nextBtn);
+        
+        return; // Baigiame funkciją, žemesnis kodas nebus vykdomas
+    }
+
+    // ==========================================
+    // REŽIMAS B: Daug puslapių (virš 7 puslapių)
+    // Įjungiamas dinaminis langas ir daugtaškiai
+    // ==========================================
+
+    // "Atgal" mygtukas («)
     const prevBtn = document.createElement('button');
     prevBtn.innerHTML = '&laquo;';
     prevBtn.disabled = currentPage === 1;
     prevBtn.onclick = () => {
         currentPage--;
         applySortingAndRender();
-        list.scrollTo(0, 0); // Grįžtame į sąrašo viršų
+        list.scrollTo(0, 0);
     };
     paginationContainer.appendChild(prevBtn);
 
-    // Puslapių numeriai
-    for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement('button');
-        btn.innerText = i;
-        if (i === currentPage) btn.className = 'active';
-        btn.onclick = () => {
-            currentPage = i;
-            applySortingAndRender();
-            list.scrollTo(0, 0);
-        };
-        paginationContainer.appendChild(btn);
+    const maxVisibleButtons = 2; // Kiek skaičių rodyti į kairę ir dešinę nuo dabartinio
+
+    // 1. Visada pridedame pirmąjį puslapį
+    paginationContainer.appendChild(createPageButton(1, 1, currentPage === 1));
+
+    // Kairysis daugtaškis: jei tarp 1-o puslapio ir matomo lango pradžios yra tarpas
+    if (currentPage - maxVisibleButtons > 2) {
+        paginationContainer.appendChild(createEllipsis());
     }
 
-    // "Pirmyn" mygtukas
+    // Paskaičiuojame dinaminio lango pradžią ir pabaigą aplink dabartinį puslapį
+    let startPage = Math.max(2, currentPage - maxVisibleButtons);
+    let endPage = Math.min(totalPages - 1, currentPage + maxVisibleButtons);
+
+    // 2. Sugeneruojame vidurinius puslapius aplink dabartinį
+    for (let i = startPage; i <= endPage; i++) {
+        paginationContainer.appendChild(createPageButton(i, i, i === currentPage));
+    }
+
+    // Dešinysis daugtaškis: jei tarp matomo lango pabaigos ir paskutinio puslapio yra tarpas
+    if (currentPage + maxVisibleButtons < totalPages - 1) {
+        paginationContainer.appendChild(createEllipsis());
+    }
+
+    // 3. Visada pridedame paskutinį puslapį
+    paginationContainer.appendChild(createPageButton(totalPages, totalPages, currentPage === totalPages));
+
+    // "Pirmyn" mygtukas (»)
     const nextBtn = document.createElement('button');
     nextBtn.innerHTML = '&raquo;';
     nextBtn.disabled = currentPage === totalPages;
@@ -276,8 +399,8 @@ function DrawCircle() {
 }
 
 // --- 7. Parduotuvių gavimas iš DB žemėlapyje ---
-const rimiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/rimi_logo.png', iconSize: [32, 25], iconAnchor: [16, 32] });
-const maximaIcon = L.icon({ iconUrl: '/Backend/static\\Icons/maxima_logo.png', iconSize: [32, 12], iconAnchor: [16, 32] });
+const rimiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/rimi_logo.png', iconSize: [32, 16], iconAnchor: [16, 32] });
+const maximaIcon = L.icon({ iconUrl: '/Backend/static\\Icons/maxima_logo.png', iconSize: [32, 8], iconAnchor: [16, 32] });
 const ikiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/iki_logo.png', iconSize: [32, 32], iconAnchor: [16, 32] });
 
 
@@ -346,10 +469,6 @@ async function GetStores() {
 // --- 8. Event Listeners ---
 
 // Rūšiavimo keitimas
-sortSelect.addEventListener("change", () => {
-    currentPage = 1; // Grįžtame į pradžią pakeitus rūšiavimą
-    applySortingAndRender();
-});
 
 // Spindulio keitimas
 radiusInput.addEventListener("input", function() {
@@ -358,10 +477,16 @@ radiusInput.addEventListener("input", function() {
 });
 
 // Pagrindinis paieškos mygtukas
+// Pagrindinis paieškos mygtukas
 search_button.addEventListener("click", async function() {
+    // Patikriname, ar koordinatės vis dar yra pradinėje 0 būsenoje
+    if (latitude === 0 && longitude === 0) {
+        alert("Prašome pasirinkti vietą žemėlapyje dukart spustelint pelės klavišu!");
+        return; // Sustabdo funkcijos vykdymą, kad toliau neieškotų duomenų
+    }
+
     const foundBrands = await GetStores(); // Ieškom parduotuvių aplink
     performSearch(foundBrands); // Skreipinam prekes
-    
 });
 
 // Sidebar uždarymas
@@ -398,6 +523,7 @@ let preferenceWeight = 5;
 preferenceInput.addEventListener("input", function() {
     preferenceWeight = preferenceInput.value; 
 });
+document.addEventListener("DOMContentLoaded", updatePreferences);
 
 
 // --- 9. Adresų Autocomplete Logika ---
