@@ -11,6 +11,13 @@ services:
       - "5432:5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+    # --- SUTAISYTAS HEALTHCHECK ---
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d map_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   importer:
     image: ubuntu:22.04
@@ -69,7 +76,8 @@ services:
       - DB_PORT=${DB_PORT:-5432}
       - PYTHONPATH=/app:/app/Crawler:/app/Crawler/Crawler
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     cap_add:
       - SYS_PTRACE
     security_opt:

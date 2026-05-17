@@ -18,7 +18,7 @@ import time
 from datetime import datetime
 
 import psycopg2
-from database import save_products_to_db
+from database import save_products_to_db, has_products
 
 import tracemalloc
 
@@ -278,6 +278,7 @@ def start_scraping_job():
     # IKI dalis
     categorie_grabber(IKI_url_categories)
     subcategorie_grabber(IKI_url_categories)
+
     all_iki = IKI_crawler(IKI_url_API)
     save_products_to_db(all_iki, "Iki")
     
@@ -291,14 +292,22 @@ def start_scraping_job():
         print(stat)
 
 if __name__ == "__main__":
-    # Nustatome norimą laiką
-    # Docker laikas atsilieka 3 valandom todel reikia
+    # Nustatome norimą laiką kasdieniam atnaujinimui
+    # Docker laikas atsilieka 3 valandom, todėl reikia priderinti pagal poreikį
     TARGET_HOUR = 6
     TARGET_MINUTE = 30
-     # Run once immediately on startup so the table/data exists right away
-    print("=== Running initial scrape on startup... ===", flush=True)
-    start_scraping_job()
-    print(f"=== Skraperis paleistas. Laukiama {TARGET_HOUR}:{TARGET_MINUTE} ===", flush=True)
+    
+    print("=== Tikrinama duomenų bazės būsena... ===", flush=True)
+    
+    # --- Svarbiausia patikra starto metu ---
+    if has_products():
+        print("=== Duomenų bazėje jau yra prekių! Pirminis skreipinimas PRALEIDŽIAMAS. ===", flush=True)
+    else:
+        print("=== Duomenų bazė tuščia! Paleidžiamas pirminis skreipinimas... ===", flush=True)
+        start_scraping_job()
+        print("=== Pirminis skreipinimas sėkmingai baigtas! ===", flush=True)
+
+    print(f"=== Skraperis lieka veikti fone. Laukiama suplanuoto laiko {TARGET_HOUR}:{TARGET_MINUTE} ===", flush=True)
     
     while True:
         now = datetime.now()
@@ -306,7 +315,7 @@ if __name__ == "__main__":
         # Tikriname, ar dabartinė valanda ir minutė sutampa su nustatyta
         if now.hour == TARGET_HOUR and now.minute == TARGET_MINUTE:
             try:
-                print(f"[{now}] Laikas pasiektas! Pradedamas skrapinimas...", flush=True)
+                print(f"[{now}] Laikas pasiektas! Pradedamas suplanuotas kasdienis skrapinimas...", flush=True)
                 start_scraping_job()
                 print(f"[{now}] Darbas baigtas sėkmingai.", flush=True)
                 

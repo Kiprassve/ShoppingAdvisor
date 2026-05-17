@@ -1,5 +1,7 @@
 import psycopg2
 import os
+import time
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -11,6 +13,48 @@ DB_PORT = os.environ.get("DB_PORT", "5432")
 
 DB_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+def has_products():
+    """Patikrina, ar produktų lentelėje jau yra duomenų (su retry logika)."""
+    conn = None
+    max_retries = 5       # Kiek kartų bandysime jungtis
+    retry_delay = 3       # Kiek sekundžių lauksime tarp bandymų
+
+    for attempt in range(max_retries):
+        try:
+            conn = psycopg2.connect(DB_URL)
+            cursor = conn.cursor()
+            
+            # Patikriname, ar lentelė egzistuoja
+            cursor.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'products'
+                );
+            """)
+            if not cursor.fetchone()[0]:
+                return False
+
+            # Skaičiuojame įrašus
+            cursor.execute("SELECT COUNT(*) FROM products;")
+            count = cursor.fetchone()[0]
+            return count > 0
+
+        except psycopg2.OperationalError as e:
+            # Jei tai prisijungimo klaida (pvz., Connection refused), palaukiame ir bandom vėl
+            print(f"[{attempt + 1}/{max_retries}] DB dar nepasiruošusi ({e.args[0].splitlines()[0]}). Laukiama...")
+            time.sleep(retry_delay)
+        except Exception as e:
+            # Jei tai kokia nors kita kritinė klaida, stabdom iškart
+            print(f"Kritinė klaida tikrinant DB: {e}")
+            return False
+        finally:
+            if conn:
+                cursor.close()
+                conn.close()
+                
+    # Jei po visų bandymų vis tiek nepavyko prisijungti:
+    print("Nepavyko prisijungti prie DB po kelių bandymų. Saugumo sumetimais praleidžiame skreipinimą, kad neperkrautume sistemos.")
+    return True  # Grąžiname True, kad crawleris nepradėtų skreipinti „į niekur“ (nes DB vis tiek neveikia)
 
 def save_products_to_db(products, store_name):
     conn = None
@@ -31,6 +75,7 @@ def save_products_to_db(products, store_name):
                 store_name TEXT
             );
         """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_products_store_name ON products(store_name);")
 
         # Išvalome senas tos parduotuvės prekes
         cursor.execute("DELETE FROM products WHERE store_name = %s", (store_name,))
