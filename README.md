@@ -3,12 +3,11 @@
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python)
 ![Flask](https://img.shields.io/badge/Flask-Framework-black?style=for-the-badge&logo=flask)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-PostGIS-blue?style=for-the-badge&logo=postgresql)
-![React](https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 
 ## 📝 Aprašas
 Kuriama programų sistema skirta automatizuotam maisto produktų duomenų rinkimui iš trijų didžiausių Lietuvos mažmeninės prekybos tinklų – **IKI**, **Rimi** ir **Maxima**. 
 
-Duomenų rinkimo modulis naudoja žiniatinklio turinio gavybos (angl. *web scraping*) metodus produktų pavadinimams, kainoms ir mitybinei informacijai (baltymams, angliavandeniams, riebalams, kalorijoms ir t.t.) gauti iš kiekvieno tinklo oficialios interneto svetainės. 
+Duomenų rinkimo modulis naudoja *web scraping* metodus produktų pavadinimams, kainoms ir mitybinei informacijai (baltymams, angliavandeniams, riebalams, kalorijoms ir t.t.) gauti iš kiekvieno tinklo oficialios interneto svetainės. 
 
 Surinkti duomenys integruojami į interaktyvią, žemėlapiu grįstą vartotojo sąsają, kurioje naudotojas nurodo paieškos centrą ir spindulį. Sistema automatiškai identifikuoja visas parduotuves nustatytame geografiniame spindulyje, naudodamasi **OpenStreetMap** duomenų baze, ir pateikia jose parduodamų produktų sąrašą. Rezultatus galima filtruoti ir rūšiuoti pagal pasirinktas mitybines vertybes – baltymų ar angliavandenių kiekį – suteikiant galimybę priimti informuotus pirkimo sprendimus.
 
@@ -32,7 +31,7 @@ Surinkti duomenys integruojami į interaktyvią, žemėlapiu grįstą vartotojo 
 ---
 
 ## 🏗️ Architektūra
-Projektas realizuotas naudojant **Flask** (Python) backend serverį, **React.js** frontendą ir **PostgreSQL** duomenų bazę su **PostGIS** plėtiniu, užtikrinančiu efektyvias geografines užklausas.
+Projektas realizuotas naudojant **Flask** (Python) backend serverį ir **PostgreSQL** duomenų bazę su **PostGIS** plėtiniu, užtikrinančiu efektyvias geografines užklausas.
 
 ---
 
@@ -52,10 +51,6 @@ Projektas realizuotas naudojant **Flask** (Python) backend serverį, **React.js*
 
 ## 📖 Trumpa naudotojo dokumentacija
 
-Ši dokumentacija skirta greitam sistemos serverio dalies (Backend) paleidimui lokaliame kompiuteryje bei susipažinimui su pateikiamais API galiniais taškais (Endpoints).
-
----
-
 ### ⚙️ 1. Aplinkos konfigūracija (`.env`)
 
 Prieš paleidžiant serverį, pagrindiniame projekto aplanke (`/PriceScraper`) būtina sukurti failą pavadinimu **`.env`** ir jame nurodyti prisijungimo prie PostgreSQL (su PostGIS plėtiniu) duomenis:
@@ -66,27 +61,25 @@ DB_NAME=map_demo
 DB_USER=postgres
 DB_PASS=tavo_duomenu_bazes_slaptazodis
 DB_PORT=5432
+```
+### 🚀 2. Projekto paleidimas naudojant Docker
 
-### 🚀 2. Projekto paleidimas
+Jei jūsų kompiuteryje įdiegtas **Docker**, visą sistemą (Flask serverį ir PostgreSQL su PostGIS duomenų baze) galite pakelti viena komanda pagrindiniame aplanke:
 
-Sekite šiuos žingsnius terminale, kad paruoštumėte ir paleistumėte sistemą savo kompiuteryje:
-
-#### A. Priklausomybių įrašymas
-Atsidarykite terminalą projekto aplanke ir įdiekite visas reikalingas Python bibliotekas:
 ```bash
-pip install -r requirements.txt
+docker-compose up --build
+```
+Ši komanda automatiškai atsiųs reikiamus atvaizdus, sukonfigūruos tinklą, paleis duomenų bazę ir pakels Flask serverį adresu: http://localhost:5000.
 
 ### 💻 3. Naudojimasis sistema per sąsają (Frontend)
 
-Paleidę React aplikaciją savo naršyklėje (dažniausiai adresu `http://localhost:3000`), maisto produktų kainų ir vietovių analizę galite atlikti keliais paprastais žingsniais:
+Atsidarykite naršyklę ir eikite adresu http://localhost:5000 (arba jūsų nurodytu Flask adresu):
 
 1. **Pažymėkite savo vietą žemėlapyje:**
-    * Spustelkite kairiuoju pelės klavišu bet kurioje interaktyvaus žemėlapio vietoje, kad nustatytumėte savo paieškos centrą (tašką), arba leiskite sistemai automatiškai nustatyti jūsų esamas koordinates.
+    * Spustelkite kairiuoju pelės klavišu du kartus bet kurioje interaktyvaus žemėlapio vietoje, kad nustatytumėte savo paieškos centrą.
 2. **Nustatykite paieškos spindulį:**
-    * Šoniniame valdymo skydelyje įveskite norimą atstumą metrais (pvz., įrašius `1500`, sistema ieškos parduotuvių 1.5 km spinduliu). Pagal **OpenStreetMap** duomenis sistema automatiškai suras visas šiame apskritime esančias prekybos vietas.
-3. **Pasirinkite prekybos tinklus:**
-    * Vartotojo sąsajoje pažymėkite arba nuimkite varneles prie konkrečių prekybos tinklų (IKI, Rimi), iš kurių norite matyti prekių asortimentą.
-4. **Filtruokite ir rūšiuokite prekes:**
-    * Viršutiniame skydelyje pasirinkite norimą rikiavimo kriterijų. Galite akimirksniu surikiuoti visus aplinkinių parduotuvių produktus pagal:
-        * **Kainą** (ieškant pigiausių alternatyvų arba lojalumo nuolaidų).
+    * Įveskite norimą atstumą metrais. Pagal **OpenStreetMap** duomenis sistema automatiškai suras visas šiame apskritime esančias prekybos vietas.
+3. **Filtruokite ir rūšiuokite prekes:**
+    * Skydelyje pasirinkite norimą rikiavimo kriterijų. Galite akimirksniu surikiuoti visus aplinkinių parduotuvių produktus pagal:
+        * **Kainą** (ieškant pigiausių alternatyvų).
         * **Mitybinę vertę** (rūšiuojant pagal didžiausią *baltymų* arba mažiausią *angliavandenių* bei *riebalų* kiekį 100-ame gramų).
