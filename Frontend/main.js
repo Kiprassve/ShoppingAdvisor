@@ -83,34 +83,39 @@ function updateUI() {
 
 // --- 2. Rūšiavimo logika ---
 function sortProducts(data) { 
-
-        console.log(selectedMacros[0].id + " "+selectedMacros[1].id);
-     const n = data.length;
-  for (let i = 0; i < n - 1; i++) {
-    for (let j = 0; j < n - i - 1; j++) {
-        
-let curFirstMacro = getMacro(data,0,j,oneSortPrice);
-let curSecondMacro = getMacro(data,1,j,twoSortPrice);
-let nextFirstMacro = getMacro(data,0,j+1,oneSortPrice);
-let nextSecondMacro = getMacro(data,1,j+1,twoSortPrice);
-
-let a = oneSortAscending? 1:-1;
-let b = twoSortAscending? 1:-1;
-
-console.log(curFirstMacro +" * "+preferenceWeight+" * "+a+" )+( "+ curSecondMacro+" *"+(10-preferenceWeight)+" * "+b);
-let first = (curFirstMacro * preferenceWeight * a) + (curSecondMacro * (10-preferenceWeight) * b);
-console.log(nextFirstMacro +" * "+preferenceWeight+" * "+a+" )+( "+ nextSecondMacro+" *"+(10-preferenceWeight)+" * "+b);
-let second = (nextFirstMacro * preferenceWeight * a) + (nextSecondMacro * (10-preferenceWeight) * b);
-console.log(first +" "+ second);
-      if (first > second) {
-        console.log("work");
-        [data[j], data[j + 1]] = [data[j + 1], data[j]];
-      }
+    // GUARD CLAUSE: If data is empty or user hasn't selected 2 macros yet, skip sorting
+    if (!data || data.length === 0) return [];
+    if (!selectedMacros || selectedMacros.length < 2) {
+        console.warn("Pasirinkite bent 2 makroelementus rūšiavimui!");
+        return data; // Return the data as-is without crashing
     }
-  }
+
+    console.log(selectedMacros[0].id + " " + selectedMacros[1].id);
+    const n = data.length;
+
+    for (let i = 0; i < n - 1; i++) {
+        for (let j = 0; j < n - i - 1; j++) {
+            
+            let curFirstMacro = getMacro(data, 0, j, oneSortPrice);
+            let curSecondMacro = getMacro(data, 1, j, twoSortPrice);
+            let nextFirstMacro = getMacro(data, 0, j + 1, oneSortPrice);
+            let nextSecondMacro = getMacro(data, 1, j + 1, twoSortPrice);
+
+            let a = oneSortAscending ? 1 : -1;
+            let b = twoSortAscending ? 1 : -1;
+
+            let first = (curFirstMacro * preferenceWeight * a) + (curSecondMacro * (10 - preferenceWeight) * b);
+            let second = (nextFirstMacro * preferenceWeight * a) + (nextSecondMacro * (10 - preferenceWeight) * b);
+
+            if (first > second) {
+                [data[j], data[j + 1]] = [data[j + 1], data[j]];
+            }
+        }
+    }
     
     return data;
 }
+
 function getMacro(data, i ,j,byPrice){
 
         let Macro;   
@@ -280,8 +285,8 @@ function DrawCircle() {
 }
 
 // --- 7. Parduotuvių gavimas iš DB žemėlapyje ---
-const rimiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/rimi_logo.png', iconSize: [32, 25], iconAnchor: [16, 32] });
-const maximaIcon = L.icon({ iconUrl: '/Backend/static\\Icons/maxima_logo.png', iconSize: [32, 12], iconAnchor: [16, 32] });
+const rimiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/rimi_logo.png', iconSize: [32, 16], iconAnchor: [16, 32] });
+const maximaIcon = L.icon({ iconUrl: '/Backend/static\\Icons/maxima_logo.png', iconSize: [32, 8], iconAnchor: [16, 32] });
 const ikiIcon = L.icon({ iconUrl: '/Backend/static\\Icons/iki_logo.png', iconSize: [32, 32], iconAnchor: [16, 32] });
 
 

@@ -8,6 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Įdiegiame visas Python bibliotekas
+RUN pip install py-spy
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Nukopijuojame visą tavo projekto turinį (app.py, Crawler aplanką ir t.t.)

@@ -20,11 +20,25 @@ from datetime import datetime
 import psycopg2
 from database import save_products_to_db
 
+import tracemalloc
+
 #auto scrape
 import time
 import urllib.request
 
 import Product
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+DB_HOST = os.environ.get("DB_HOST", "db")
+DB_NAME = os.environ.get("DB_NAME", "map_demo")
+DB_USER = os.environ.get("DB_USER", "postgres")
+DB_PASS = os.environ.get("DB_PASS", "password123")
+DB_PORT = os.environ.get("DB_PORT", "5432")
+
+DB_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -250,6 +264,7 @@ def IKI_crawler(url):
 # --- AUTOMATIZACIJOS LOGIKA ---
 
 def start_scraping_job():
+    tracemalloc.start()
     print(f"[{datetime.now()}] Skreipinimas pradedamas...")
     
     # RIMI dalis (per visus URL)
@@ -267,6 +282,13 @@ def start_scraping_job():
     save_products_to_db(all_iki, "Iki")
     
     print(f"[{datetime.now()}] Visi duomenys sėkmingai atnaujinti.")
+
+    snapshot = tracemalloc.take_snapshot()
+    top_stats = snapshot.statistics('lineno')
+
+    print("[Atminties naudojimo Top 10]")
+    for stat in top_stats[:10]:
+        print(stat)
 
 if __name__ == "__main__":
     # Nustatome norimą laiką

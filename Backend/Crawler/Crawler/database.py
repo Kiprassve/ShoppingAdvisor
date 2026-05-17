@@ -1,9 +1,17 @@
 import psycopg2
 import os
-from dotenv import load_dotenv # Reikia instaliuoti python-dotenv
+from dotenv import load_dotenv
+load_dotenv()
 
-# DB prisijungimo duomenys
-DB_URL = os.getenv('DATABASE_URL', "postgresql://postgres:password123@db:5432/map_demo")
+DB_HOST = os.environ.get("DB_HOST", "db")
+DB_NAME = os.environ.get("DB_NAME", "map_demo")
+DB_USER = os.environ.get("DB_USER", "postgres")
+DB_PASS = os.environ.get("DB_PASS", "password123")
+DB_PORT = os.environ.get("DB_PORT", "5432")
+
+DB_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+
 def save_products_to_db(products, store_name):
     conn = None
     try:
