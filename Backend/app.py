@@ -46,7 +46,7 @@ def get_data():
         # Naudojame IN operatorių, kad paimtume duomenis tik iš pasirinktų parduotuvių
         # Taip pat surūšiuojame pagal sukūrimo laiką, kad matytume naujausius skreipinimo rezultatus
         query = """
-            SELECT name, price, image_url, protein, carbohydrates, fat, calories, store_name 
+            SELECT name, price, image_url, protein, carbohydrates, fat, calories, store_name,weight 
             FROM products 
             WHERE store_name = ANY(%s)
             ORDER BY id DESC
@@ -77,7 +77,8 @@ def get_data():
                 "riebalai": float(row[5] or 0),
                 "calories": float(row[6] or 0),
                 "store": row[7],
-                "storeLogo": matched_logo
+                "weight": float(row[8]) if row[8] else None,  
+                "storeLogo": f"[http://127.0.0.1:5000/static/Icons/](http://127.0.0.1:5000/static/Icons/){row[7].lower()}_logo.png"
             })
             
         return jsonify(data)

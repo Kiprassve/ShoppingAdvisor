@@ -28,7 +28,8 @@ def save_products_to_db(products, store_name):
                 carbohydrates NUMERIC,
                 fat NUMERIC,
                 calories NUMERIC,
-                store_name TEXT
+                store_name TEXT,
+                weight NUMERIC
             );
         """)
 
@@ -44,8 +45,9 @@ def save_products_to_db(products, store_name):
                 carbohydrates, 
                 fat, 
                 calories, 
-                store_name
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                store_name,
+                weight
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
 
         for p in products:
@@ -68,7 +70,8 @@ def save_products_to_db(products, store_name):
                 clean_float(p.carbohydrates),  # 5. carbohydrates
                 clean_float(p.fat),            # 6. fat
                 clean_float(p.calories_kcal),  # 7. calories
-                store_name                     # 8. store_name
+                store_name, 
+                clean_float(p.weight_kg),            # 8. store_name
             ))
 
         conn.commit()
