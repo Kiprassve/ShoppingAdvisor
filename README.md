@@ -34,13 +34,6 @@ Surinkti duomenys integruojami į interaktyvią, žemėlapiu grįstą vartotojo 
 ## 🏗️ Architektūra
 Projektas realizuotas naudojant **Flask** (Python) backend serverį, **React.js** frontendą ir **PostgreSQL** duomenų bazę su **PostGIS** plėtiniu, užtikrinančiu efektyvias geografines užklausas.
 
-```mermaid
-graph TD
-    A[Duomenų rinkiklis: Crawler.py] -->|Išsaugo prekes| B[(PostgreSQL + PostGIS DB)]
-    C[(OpenStreetMap: planet_osm_point / polygon)] -.-> B
-    D[Flask API: app.py] <-->|psycopg2 užklausos| B
-    E[Frontend: React.js Vartotojas] <-->|REST API / JSON| D
-
 ---
 
 ### 📂 Komponentai ir failų struktūra
