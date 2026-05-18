@@ -513,7 +513,7 @@ async function GetStores() {
     }
     return foundBrands;
 }
-//app.py metodo iskvetimas get_data(iki,rimi,maxima)
+
 
 // --- 8. Event Listeners ---
 
@@ -542,9 +542,9 @@ sidebar_close_button.addEventListener("click", () => {
     sidebar.classList.remove('open');
 });
 
+
 // Žemėlapio inicializacija užsikrovus puslapiui
 document.addEventListener("DOMContentLoaded", instantiateMap);
-
 
 let oneSortPrice =true;
 sort_Option_One.addEventListener('change',function(){
@@ -572,3 +572,59 @@ preferenceInput.addEventListener("input", function() {
     preferenceWeight = preferenceInput.value; 
 });
 document.addEventListener("DOMContentLoaded", updatePreferences);
+
+
+// --- 9. Adresų Autocomplete Logika ---
+const locationInput = document.getElementById('locationInput');
+const autocompleteList = document.getElementById('autocomplete-list');
+
+// Debounce timer — prevents firing a request on every single keystroke.
+// The search only runs 300ms after the user stops typing, so you never
+// see stale results from intermediate states like "bijunu g. 1".
+let autocompleteTimeout = null;
+
+locationInput.addEventListener('input', (e) => {
+    const val = e.target.value;
+    autocompleteList.innerHTML = '';
+
+    if (val.length < 3) return;
+
+    // Cancel any pending request from the previous keystroke
+    clearTimeout(autocompleteTimeout);
+
+    autocompleteTimeout = setTimeout(async () => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/search-address?q=${encodeURIComponent(val)}`);
+            const suggestions = await res.json();
+
+            console.log("Gauti duomenys:", suggestions);
+
+            suggestions.forEach(place => {
+                const div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.textContent = place.name;
+
+                div.addEventListener('click', () => {
+                    locationInput.value = place.name;
+                    autocompleteList.innerHTML = '';
+
+                    latitude  = parseFloat(place.lat);
+                    longitude = parseFloat(place.lon);
+
+                    map.setView([latitude, longitude], 15);
+                    DrawCircle();
+                });
+                autocompleteList.appendChild(div);
+            });
+        } catch (err) {
+            console.error("Klaida gaunant adresus:", err);
+        }
+    }, 300); // wait 300ms after last keystroke before searching
+});
+
+// Uždaryti sąrašą paspaudus bet kur kitur
+document.addEventListener('click', (e) => {
+    if (e.target !== locationInput && autocompleteList) {
+        autocompleteList.innerHTML = '';
+    }
+});

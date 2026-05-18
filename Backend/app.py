@@ -30,6 +30,8 @@ def get_data():
     # 1. Gauname filtrus iš užklausos
     exist_rimi = request.args.get('rimi', 'false').lower()
     exist_iki = request.args.get('iki', 'false').lower()
+    exist_maxima = request.args.get('maxima', 'false').lower()
+
     
     # 2. Profesionalus puslapiavimas: gauname page ir per_page parametrus
     page = request.args.get('page', 1, type=int)
@@ -45,6 +47,7 @@ def get_data():
     stores_to_fetch = []
     if exist_rimi == 'true': stores_to_fetch.append('Rimi')
     if exist_iki == 'true': stores_to_fetch.append('Iki')
+    if exist_maxima == 'true': stores_to_fetch.append('Maxima')
 
     if not stores_to_fetch:
         return jsonify({
@@ -121,7 +124,163 @@ def get_data():
         if conn:
             cursor.close()
             conn.close()
-
+ 
+ 
+@app.route('/api/search-address', methods=['GET'])
+def search_address():
+    query = request.args.get('q', '').strip()
+    if len(query) < 3:
+        return jsonify([])
+ 
+    conn = None
+    try:
+        conn = psycopg2.connect(DB_URL)
+        cursor = conn.cursor()
+ 
+        LT_FROM = 'ąčęėįšųūž'
+        LT_TO   = 'aceeisuuz'
+ 
+        # For address branches: %query% finds all matches (contains), but the CASE
+        # scoring separates exact (1) → starts-with (2) → contains (3).
+        # Sorting by score then by match_len puts "Bijūnų g. 12" above "Bijūnų g. 121".
+        search_param = f"%{query}%"
+ 
+        # For name-based branches: split the query into individual words and require
+        # ALL of them (AND logic). This bypasses special chars like „ " that sit
+        # between words in names such as PLC „Mega", so "plc mega" matches correctly.
+        words = [w for w in query.split() if len(w) >= 2]
+        if not words:
+            words = [query]
+ 
+        name_where = " AND ".join([
+            f"translate(lower(name), '{LT_FROM}', '{LT_TO}') ILIKE translate(lower(%s), '{LT_FROM}', '{LT_TO}')"
+            for _ in words
+        ])
+        word_params = [f"%{w}%" for w in words]
+ 
+        sql = f"""
+            WITH scored AS (
+ 
+                -- ADDRESS SEARCH: planet_osm_point
+                SELECT
+                    TRIM(addr_street || ' ' || addr_housenumber
+                         || COALESCE(', ' || addr_city, '')) AS display_name,
+                    ST_Y(way)                                 AS lat,
+                    ST_X(way)                                 AS lon,
+                    CASE
+                        WHEN translate(lower(addr_street || ' ' || addr_housenumber), '{LT_FROM}', '{LT_TO}')
+                             = translate(lower(%s), '{LT_FROM}', '{LT_TO}')             THEN 1
+                        WHEN translate(lower(addr_street || ' ' || addr_housenumber), '{LT_FROM}', '{LT_TO}')
+                             LIKE translate(lower(%s), '{LT_FROM}', '{LT_TO}') || '%%' THEN 2
+                        ELSE 3
+                    END AS score,
+                    length(addr_street || ' ' || addr_housenumber) AS match_len
+                FROM planet_osm_point
+                WHERE addr_street IS NOT NULL AND addr_housenumber IS NOT NULL
+                  AND translate(lower(addr_street || ' ' || addr_housenumber), '{LT_FROM}', '{LT_TO}')
+                      ILIKE translate(lower(%s), '{LT_FROM}', '{LT_TO}')
+ 
+                UNION ALL
+ 
+                -- ADDRESS SEARCH: planet_osm_polygon
+                SELECT
+                    TRIM(addr_street || ' ' || addr_housenumber
+                         || COALESCE(', ' || addr_city, '')) AS display_name,
+                    ST_Y(ST_Centroid(way))                    AS lat,
+                    ST_X(ST_Centroid(way))                    AS lon,
+                    CASE
+                        WHEN translate(lower(addr_street || ' ' || addr_housenumber), '{LT_FROM}', '{LT_TO}')
+                             = translate(lower(%s), '{LT_FROM}', '{LT_TO}')             THEN 1
+                        WHEN translate(lower(addr_street || ' ' || addr_housenumber), '{LT_FROM}', '{LT_TO}')
+                             LIKE translate(lower(%s), '{LT_FROM}', '{LT_TO}') || '%%' THEN 2
+                        ELSE 3
+                    END AS score,
+                    length(addr_street || ' ' || addr_housenumber) AS match_len
+                FROM planet_osm_polygon
+                WHERE addr_street IS NOT NULL AND addr_housenumber IS NOT NULL
+                  AND translate(lower(addr_street || ' ' || addr_housenumber), '{LT_FROM}', '{LT_TO}')
+                      ILIKE translate(lower(%s), '{LT_FROM}', '{LT_TO}')
+ 
+                UNION ALL
+ 
+                -- NAME SEARCH: planet_osm_polygon (Mega, Akropolis, etc.)
+                SELECT
+                    TRIM(name || COALESCE(', ' || addr_city, '')) AS display_name,
+                    ST_Y(ST_Centroid(way))                         AS lat,
+                    ST_X(ST_Centroid(way))                         AS lon,
+                    CASE
+                        WHEN translate(lower(name), '{LT_FROM}', '{LT_TO}')
+                             = translate(lower(%s), '{LT_FROM}', '{LT_TO}')             THEN 1
+                        WHEN translate(lower(name), '{LT_FROM}', '{LT_TO}')
+                             LIKE translate(lower(%s), '{LT_FROM}', '{LT_TO}') || '%%' THEN 2
+                        ELSE 3
+                    END AS score,
+                    length(name) AS match_len
+                FROM planet_osm_polygon
+                WHERE name IS NOT NULL
+                  AND (shop IS NOT NULL OR amenity IS NOT NULL OR building IS NOT NULL)
+                  AND {name_where}
+ 
+                UNION ALL
+ 
+                -- NAME SEARCH: planet_osm_point (smaller shops / amenity nodes)
+                SELECT
+                    TRIM(name || COALESCE(', ' || addr_city, '')) AS display_name,
+                    ST_Y(way)                                       AS lat,
+                    ST_X(way)                                       AS lon,
+                    CASE
+                        WHEN translate(lower(name), '{LT_FROM}', '{LT_TO}')
+                             = translate(lower(%s), '{LT_FROM}', '{LT_TO}')             THEN 1
+                        WHEN translate(lower(name), '{LT_FROM}', '{LT_TO}')
+                             LIKE translate(lower(%s), '{LT_FROM}', '{LT_TO}') || '%%' THEN 2
+                        ELSE 3
+                    END AS score,
+                    length(name) AS match_len
+                FROM planet_osm_point
+                WHERE name IS NOT NULL
+                  AND (shop IS NOT NULL OR amenity IS NOT NULL)
+                  AND {name_where}
+            )
+            -- Inner DISTINCT ON keeps the best-scored row when the same display_name
+            -- appears in both point and polygon tables.
+            -- Outer ORDER BY then sorts all survivors by relevance.
+            SELECT display_name, lat, lon
+            FROM (
+                SELECT DISTINCT ON (display_name)
+                       display_name, lat, lon, score, match_len
+                FROM scored
+                WHERE display_name IS NOT NULL AND display_name <> ''
+                ORDER BY display_name, score ASC, match_len ASC
+            ) AS deduped
+            ORDER BY score ASC, match_len ASC
+            LIMIT 10;
+        """
+ 
+        # Parameter order matches %s placeholders above:
+        #   address points  : query (CASE ×2) + search_param (WHERE ×1)
+        #   address polygons: query (CASE ×2) + search_param (WHERE ×1)
+        #   name polygons   : query (CASE ×2) + word_params  (WHERE, one per word)
+        #   name points     : query (CASE ×2) + word_params  (WHERE, one per word)
+        params = (
+            query, query, search_param,
+            query, query, search_param,
+            query, query, *word_params,
+            query, query, *word_params,
+        )
+ 
+        cursor.execute(sql, params)
+        rows = cursor.fetchall()
+        results = [{"name": r[0], "lat": r[1], "lon": r[2]} for r in rows]
+        return jsonify(results)
+ 
+    except Exception as e:
+        print(f"Klaida: {e}")
+        return jsonify([])
+    finally:
+        if conn:
+            conn.close()
+ 
+ 
 @app.route('/api/stores', methods=['GET'])
 def get_stores():
     lat = request.args.get('lat', type=float)
@@ -186,16 +345,17 @@ def get_stores():
             })
             
         return jsonify(stores)
-    
+ 
     except Exception as e:
         print("Database error:", e)
         return jsonify({"error": str(e)}), 500
+ 
     finally:
         if conn:
             cursor.close()
             conn.close()
-
-# SVARBU: Įsitikink, kad virš šios eilutės NĖRA jokio kito Rimi_crawler(url) kvietimo!
+ 
+ 
 if __name__ == '__main__':
     print("Flask serveris startuoja ant porto 5000...")
     app.run(debug=True, host='0.0.0.0', port=5000)

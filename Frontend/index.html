@@ -13,7 +13,12 @@
     <div id="map"></div>
 
     <div class="upperContainer">
-        <input type="text" id="locationInput" placeholder="Search Address..." class="custom-btn"/>
+        <div class="search-wrapper">
+            <input type="text" id="locationInput" placeholder="Search Address..." class="custom-btn" autocomplete="off"/>
+            <div id="autocomplete-list" class="autocomplete-items"></div>
+        </div>
+
+        <button class="custom-btn"><img src="/Backend/static/Icons/pin.png">Place Pin</button>
         <button class="custom-btn" id="search-btn"><img src="/Backend/static/Icons/search.png">Search</button>
     </div>
 

@@ -24,14 +24,18 @@ services:
     depends_on:
       - db
     volumes:
-      - ./data:/osm
+
+      - ./Data:/osm                          # 'Data' iš didžiosios raidės, kaip nuotraukoje
+      - ./Frontend/import.sh:/osm/import.sh  # Failas yra Frontend kataloge
+      - ./Frontend/kaunas.lua:/osm/kaunas.lua
     environment:
      - PGPASSWORD=${DB_PASS:-password123}
      - DEBIAN_FRONTEND=noninteractive
     command: >
-      bash -c "apt-get update && apt-get install -y osm2pgsql && 
-      echo 'Waiting 10 seconds for database to fully start...' && sleep 10 &&
-      osm2pgsql -c -d ${DB_NAME:-map_demo} -U ${DB_USER:-postgres} -H db /osm/map_data.osm.pbf"
+      bash -c "apt-get update && apt-get install -y osm2pgsql postgresql-client && 
+      chmod +x /osm/import.sh && 
+      echo 'Waiting for database...' && sleep 10 &&
+      /osm/import.sh"
 
   api:
     build: 
