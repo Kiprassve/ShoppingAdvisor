@@ -73,7 +73,7 @@ def save_products_to_db(products, store_name):
                 fat NUMERIC,
                 calories NUMERIC,
                 store_name TEXT,
-                weight NUMERIC
+                weight TEXT
             );
         """)
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_products_store_name ON products(store_name);")

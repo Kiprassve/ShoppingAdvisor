@@ -68,7 +68,7 @@ def Rimi_crawler(url):
     All_Products=[]
     while url!=None:
         for item in soup.find_all("li", class_="product-grid__item"):
-            if len(All_Products) >= 10:
+            if len(All_Products) >= 120:
                 return All_Products
             i=i+1
             weight=img_url=name=protein=fat=sugar=salt=carbs=calories="0"
@@ -325,5 +325,5 @@ if __name__ == "__main__":
                 print(f"[{now}] Klaida vykdant darbą: {e}", flush=True)
                 time.sleep(60)
         
-        # Tikriname laiką kas sekundę, kad nepraleistume minutės starto
+        # Tikriname laiką kas sekundę, kad nepraleistume minutės start
         time.sleep(1)

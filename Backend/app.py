@@ -27,38 +27,62 @@ logo_mapping = {
 
 @app.route('/api/scrape', methods=['GET'])
 def get_data():
-    # Gauname filtrus iš užklausos (pvz., ?rimi=true&iki=true)
+    # 1. Gauname filtrus iš užklausos
     exist_rimi = request.args.get('rimi', 'false').lower()
     exist_iki = request.args.get('iki', 'false').lower()
     
+    # 2. Profesionalus puslapiavimas: gauname page ir per_page parametrus
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 5, type=int)  # Nutylėjimas – 5 prekės puslapyje
+    
+    # Apsauga nuo neigiamų skaičių
+    if page < 1: page = 1
+    if per_page < 1: per_page = 5
+    
+    # SQL poslinkio (OFFSET) skaičiavimas
+    offset = (page - 1) * per_page
+
     stores_to_fetch = []
     if exist_rimi == 'true': stores_to_fetch.append('Rimi')
     if exist_iki == 'true': stores_to_fetch.append('Iki')
 
     if not stores_to_fetch:
-        return jsonify([])
+        return jsonify({
+            "products": [],
+            "total_items": 0,
+            "total_pages": 0,
+            "current_page": page
+        })
 
     conn = None
     try:
         conn = psycopg2.connect(DB_URL)
         cursor = conn.cursor()
         
-        # Naudojame IN operatorių, kad paimtume duomenis tik iš pasirinktų parduotuvių
-        # Taip pat surūšiuojame pagal sukūrimo laiką, kad matytume naujausius skreipinimo rezultatus
+        # 3. Pirmiausia sužinome, KIEK IŠ VISO prekių atitinka filtrą duomenų bazėje
+        count_query = """
+            SELECT COUNT(*) FROM products WHERE store_name = ANY(%s);
+        """
+        cursor.execute(count_query, (stores_to_fetch,))
+        total_items = cursor.fetchone()[0]
+        
+        # Apskaičiuojame bendrą puslapių skaičių
+        import math
+        total_pages = math.ceil(total_items / per_page)
+        
+        # 4. Paimame TIK to puslapio duomenis naudodami LIMIT ir OFFSET
         query = """
-            SELECT name, price, image_url, protein, carbohydrates, fat, calories, store_name,weight 
+            SELECT name, price, image_url, protein, carbohydrates, fat, calories, store_name, weight 
             FROM products 
             WHERE store_name = ANY(%s)
             ORDER BY id DESC
-            LIMIT 100;
+            LIMIT %s OFFSET %s;
         """
-        
-        cursor.execute(query, (stores_to_fetch,))
+        cursor.execute(query, (stores_to_fetch, per_page, offset))
         rows = cursor.fetchall()
         
-        data = []
+        products_list = []
         for row in rows:
-            # Logo detection
             store_name_raw = row[7] or ""
             store_name_lower = store_name_raw.lower().strip()
             
@@ -68,7 +92,7 @@ def get_data():
                     matched_logo = logo_mapping[brand]
                     break
 
-            data.append({
+            products_list.append({
                 "name": row[0],
                 "price": float(row[1]),
                 "image": row[2],
@@ -77,11 +101,18 @@ def get_data():
                 "riebalai": float(row[5] or 0),
                 "calories": float(row[6] or 0),
                 "store": row[7],
-                "weight": float(row[8]) if row[8] else None,  
-                "storeLogo": f"[http://127.0.0.1:5000/static/Icons/](http://127.0.0.1:5000/static/Icons/){row[7].lower()}_logo.png"
+                "storeLogo": matched_logo,
+                "weight": row[8]
             })
             
-        return jsonify(data)
+        # 5. Grąžiname struktūrizuotą atsakią su puslapiavimo meta-duomenimis
+        return jsonify({
+            "products": products_list,
+            "total_items": total_items,
+            "total_pages": total_pages,
+            "current_page": page,
+            "per_page": per_page
+        })
     
     except Exception as e:
         print(f"Klaida imant duomenis iš DB: {e}")
