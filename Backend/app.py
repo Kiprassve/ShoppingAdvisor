@@ -4,14 +4,6 @@ from flask_cors import CORS
 from Crawler.Crawler.Crawler import Rimi_crawler
 import psycopg2
 import os
-<<<<<<< HEAD
- 
-app = Flask(__name__, static_folder='static')
-CORS(app)
- 
-DB_URL = os.environ.get("DATABASE_URL","postgresql://postgres:password123@db:5432/map_demo")
- 
-=======
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -33,16 +25,18 @@ logo_mapping = {
     "iki": "http://127.0.0.1:5000/static/Icons/iki_logo.png"
 }
 
->>>>>>> ae7a0755a811762d64daec479fabda5bb99b69d3
 @app.route('/api/scrape', methods=['GET'])
 def get_data():
     # Gauname filtrus iš užklausos (pvz., ?rimi=true&iki=true)
     exist_rimi = request.args.get('rimi', 'false').lower()
     exist_iki = request.args.get('iki', 'false').lower()
+    exist_maxima = request.args.get('maxima', 'false').lower()
+
     
     stores_to_fetch = []
     if exist_rimi == 'true': stores_to_fetch.append('Rimi')
     if exist_iki == 'true': stores_to_fetch.append('Iki')
+    if exist_maxima == 'true': stores_to_fetch.append('Maxima')
 
     if not stores_to_fetch:
         return jsonify([])

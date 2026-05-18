@@ -632,9 +632,9 @@ def Maxima_html_crawler(base_url):
                 # Request Product Page & Extract Nutrition Facts
                 if product_url:
                     try:
-                        time.sleep(0.2) # Apsauga nuo anti-scraping blokavimo
+                        time.sleep(0.2) # Saugus tarpas prieš atidarant detalų puslapį
                         
-                        detail_response = requests.get(product_url, headers=headers)
+                        detail_response = requests.get(product_url, headers=headers,timeout=10)
                         if detail_response.status_code == 200:
                             product_match = re.search(r'window\.product\s*=\s*(\{[\s\S]*?\});\s*</script>', detail_response.text)
                             
@@ -703,6 +703,7 @@ def Maxima_html_crawler(base_url):
                                 print("-> Warning: Could not locate window.product object.")
                         else:
                             print(f"-> Warning: Failed loading detail view. Status code: {detail_response.status_code}")
+                            time.sleep(5)
                     except Exception as detail_err:
                         print(f"-> Error crawling individual product detail page: {detail_err}")
 
@@ -741,6 +742,7 @@ def Maxima_html_crawler(base_url):
     All_Products2=[]
     for url in url_maxima:
         All_Products2=All_Products2+Maxima_html_crawler(url)
+        break
     #Writes products into a file
     if All_Products2:
         data_to_json2=[product.__dict__ for product in All_Products2]
@@ -759,6 +761,7 @@ def start_scraping_job():
         rimi_products = Rimi_crawler(url)
         all_rimi.extend(rimi_products)
         if len(all_rimi) >= 20: break # Apribojimas bandymui
+        break
     save_products_to_db(all_rimi, "Rimi")
     
     # IKI dalis
@@ -767,8 +770,17 @@ def start_scraping_job():
     all_iki = IKI_crawler(IKI_url_API)
     save_products_to_db(all_iki, "Iki")
     
-    print(f"[{datetime.now()}] Visi duomenys sėkmingai atnaujinti.")
+   
 
+    #Maximos dalis (per visus URL)
+    all_maxima = []
+    for url in url_maxima:
+        maxima_products = Maxima_html_crawler(url)
+        all_maxima.extend(maxima_products)
+        break
+    save_products_to_db(all_maxima, "Maxima")
+
+    print(f"[{datetime.now()}] Visi duomenys sėkmingai atnaujinti.")
     snapshot = tracemalloc.take_snapshot()
     top_stats = snapshot.statistics('lineno')
 
