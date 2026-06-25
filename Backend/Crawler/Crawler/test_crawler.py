@@ -43,7 +43,11 @@ class TestCrawlerMocks(unittest.TestCase):
         # Kadangi funkcija viduje vėl kviečia requests.get produkto puslapiui,
         # mūsų mock'as suveiks abu kartus.
         try:
+<<<<<<< HEAD
+            results = CrawlerModule.Rimi_crawler("https://www.hihihasz", max_pages=1, item_limit=1)
+=======
             results = CrawlerModule.Rimi_crawler("https://www.rimi.lt/test", max_pages=1, item_limit=1)
+>>>>>>> 375b8ea2cc5dda8cf2cfba8ea1db4528d46ef861
             
             # Patikriname rezultatus
             self.assertEqual(len(results), 1)
