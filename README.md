@@ -14,9 +14,9 @@ Surinkti duomenys integruojami į interaktyvią, žemėlapiu grįstą vartotojo 
 ---
 
 ## 👥 Komandos nariai
-* Pijus Šventoraitis
-* Kipras Šventoraitis
-* Vilius Gailiūnas
+* Pijus Šventoraitis (Crawler)
+* Kipras Šventoraitis(Maps/Frontedn)
+* Vilius Gailiūnas (Frontend/Backend)
 
 ---
 
