@@ -40,10 +40,11 @@ Projektas realizuotas naudojant **Flask** (Python) backend serverį ir **Postgre
 * **`app.py` (Flask serveris):**
     * `/api/scrape`: Apdoroja produktų užklausas, filtruoja duomenis pagal pasirinktus tinklus (`?rimi=true&iki=true`) ir grąžina iki 100 naujausių prekių su suderintais logotipais.
     * `/api/stores`: Priima koordinates (`lat`, `lon`) bei spindulį (`radius`). Naudoja PostGIS funkcijas (`ST_DWithin`, `ST_Transform`) realaus laiko parduotuvių paieškai OSM taškuose ir poligonuose.
-* **`Crawler.py` (Duomenų rinkiklis):**
+- **`Crawler.py` (Duomenų rinkiklis):**
     * **Rimi:** Vykdo tradicinę žiniatinklio gavybą (angl. *HTML scraping*) naudojant *BeautifulSoup* ir reguliariąsias išraiškas (RegEx), pasiekia paslėptus kodo skriptus mitybinėms vertėms gauti.
     * **IKI:** Siunčia tiesiogines POST užklausas į LastMile API paslaugą, automatiškai surinkdamas kategorijų bei subkategorijų ID identifikatorius.
-    * **Automatizacija:** Paleidimo metu atlieka pirminį duomenų atnaujinimą, o vėliau veikia cikle ir kasdien nustatytu laiku (pvz., 06:30) automatiškai atnaujina duomenis. Atlieka atminties stebėjimą per `tracemalloc`.
+    * **Maxima (Barbora):** Iteruoja per prekių kategorijų puslapius, naudodamas reguliariąsias išraiškas (RegEx) paslėptų JSON objektų (`window.b_productList` ir `window.product`) išgavimui tiesiai iš HTML kodo. Turi integruotus saugiklius apsaugai nuo begalinių ciklų bei dublikatų, o prekės svorį/tūrį ir matavimo vienetus išskaito tiesiai iš pavadinimo teksto.
+    * **Automatizacija:** Paleidimo metu atlieka pirminį duomenų atnaujinimą, o vėliau veikia cikle ir kasdien nustatytu laiku (pvz., 06:30) automatiškai atnaujina duomenis. Atlieka atminties stebėjimą per `tracemalloc`. Užklausų srautas valdomas naudojant `time.sleep()`, siekiant neapkrauti serverių.
 * **`database.py`:** Atsakingas už prisijungimą prie PostgreSQL duomenų bazės per `psycopg2` tvarkyklę. Sukuria prekių lentelę (`products`), prieš įrašant naujus duomenis automatiškai išvalo senus tos parduotuvės įrašus, konvertuoja kainas ir validuoja mitybinių verčių tipus.
 * **`Product.py`:** Duomenų modelio klasė, aprašanti prekės struktūrą (pavadinimą, kainas, svorį, mitybines vertes bei nuorodas).
 
